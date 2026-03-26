@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse; /* Merges the borders into a single line */
+        margin-top: 20px;
+    }
+    th, td {
+        border: 1px solid #ddd; /* Adds a border to cells */
+        padding: 8px; /* Adds space between content and border */
+        text-align: left; /* Aligns text to the left */
+    }
+    th {
+        background-color: #f2f2f2; /* Grey background for headers */
+    }
+    tr:nth-child(even) {
+        background-color: #f9f9f9; /* Zebra-striping for rows */
+    }
+</style>
+</head>
+<body>
+
+<h2>User Information Table</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Firstname</th>
+            <th>Lastname</th>
+            <th>Age</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.first_name }}</td>
+            <td>{{ user.last_name }}</td>
+            <td>{{ user.age }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+</body>
+</html>
