@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Users Viewer</title>
+    <style>
+        body {
+            font-family: Arial;
+            margin: 20px;
+        }
+        input, button {
+            padding: 8px;
+            margin: 5px;
+        }
+        table {
+            border-collapse: collapse;
+            margin-top: 20px;
+            width: 60%;
+        }
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Get User Data</h2>
+
+<input type="number" id="userId" placeholder="Enter User ID">
+<input type="text" id="firstName" placeholder="Enter First Name">
+
+<br>
+
+<button onclick="fetchUsers()">Search</button>
+<button onclick="fetchAllUsers()">Get All Users</button>
+
+<div id="message"></div>
+
+<table id="usersTable" style="display:none;">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>First Name</th>
+            <!-- add more columns if needed -->
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<script>
+    const BASE_URL = "http://127.0.0.1:5000/api/get_user_data";
+
+    function clearUI() {
+        document.getElementById("message").innerHTML = "";
+        document.getElementById("usersTable").style.display = "none";
+        document.querySelector("#usersTable tbody").innerHTML = "";
+    }
+
+    function renderTable(users) {
+        const table = document.getElementById("usersTable");
+        const tbody = table.querySelector("tbody");
+
+        tbody.innerHTML = "";
+
+        users.forEach(user => {
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td>${user.id}</td>
+                <td>${user.first_name}</td>
+            `;
+
+            tbody.appendChild(row);
+        });
+
+        table.style.display = "table";
+    }
+
+    function showMessage(msg, isError = false) {
+        const messageDiv = document.getElementById("message");
+        messageDiv.innerHTML = msg;
+        messageDiv.className = isError ? "error" : "";
+    }
+
+    async function fetchUsers() {
+        clearUI();
+
+        const userId = document.getElementById("userId").value;
+        const firstName = document.getElementById("firstName").value.trim();
+
+        let url = BASE_URL;
+
+        if (userId && !firstName) {
+            url += `/${userId}`;
+        } else if (!userId && firstName) {
+            url += `/${firstName}`;
+        }
+
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (!response.ok) {
+                showMessage(data.message || "Error occurred", true);
+                return;
+            }
+
+            // your API returns different keys:
+            const users = data.users_data || data.message;
+
+            if (users && users.length > 0) {
+                renderTable(users);
+            } else {
+                showMessage("No users found", true);
+            }
+
+        } catch (err) {
+          console.log(err)
+            showMessage("Failed to connect to server", true);
+        }
+    }
+
+    async function fetchAllUsers() {
+        clearUI();
+
+        try {
+            const response = await fetch(BASE_URL);
+            const data = await response.json();
+
+            if (!response.ok) {
+                showMessage(data.message || "Error occurred", true);
+                return;
+            }
+
+            if (data.users_data && data.users_data.length > 0) {
+                renderTable(data.users_data);
+            } else {
+                showMessage("No users found", true);
+            }
+
+        } catch (err) {
+            showMessage("Failed to connect to server", true);
+        }
+    }
+</script>
+
+</body>
+</html>

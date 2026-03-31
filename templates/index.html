@@ -18,11 +18,14 @@
     tr:nth-child(even) {
         background-color: #f9f9f9; /* Zebra-striping for rows */
     }
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </style>
 </head>
 <body>
 
 <h2>User Information Table</h2>
+
+    {% if users %}
 
 <table>
     <thead>
@@ -33,15 +36,19 @@
         </tr>
     </thead>
     <tbody>
-        {% for user in users %}
-        <tr>
-            <td>{{ user.first_name }}</td>
-            <td>{{ user.last_name }}</td>
-            <td>{{ user.age }}</td>
-        </tr>
-        {% endfor %}
+
+            {% for user in users %}
+            <tr>
+                <td>{{ user.first_name }}</td>
+                <td>{{ user.last_name }}</td>
+                <td>{{ user.age }}</td>
+            </tr>
+            {% endfor %}
     </tbody>
 </table>
+{% else %}
+No Users Data
+{% endif %}
 
 </body>
 </html>
