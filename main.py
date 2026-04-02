@@ -1,7 +1,9 @@
-from flask import Flask, render_template, request, url_for, redirect
+from flask import (Flask, render_template,
+                   request, url_for, redirect)
 from flask_cors import CORS
 
-
+from services.validators import validate_password, validate_email
+from services.user_service import UserService
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "http://localhost:63342"}})
 
@@ -32,25 +34,28 @@ def home():
 
 
 # API endpoint
-@app.route("/api/get_user_data/<first_name>")
-@app.route("/api/get_user_data/<int:user_id>")
-@app.route("/api/get_user_data")
-def get_user_data(user_id: int = None, first_name: str = None):
-    print(f'shemovida parametri : {user_id} = {first_name}')
+@app.route("/api/user_data/<int:user_id>")
+@app.route("/api/user_data")
+def user_data(user_id: int = None):
     found_users = []
 
+    first_name = request.args.get("first_name")
+
     if user_id is None and first_name is not None:
-        for user_data in users:
-            if first_name.lower() == user_data["first_name"].lower():
-                found_users.append(user_data)
+        UserService.get_users_with_word(first_name, users, found_users)
+
     elif user_id is not None and first_name is None:
-        for user_data in users:
-            if user_id == user_data["id"]:
-                found_users.append(user_data)
-    else:
+        user = UserService.get_user_with_id(user_id, users)
+        return user
+
+    elif user_id and first_name:
+        user = UserService.get_user_with_id(user_id, users)
+        print(user)
+        UserService.get_users_with_word(first_name, [user], found_users)
+        print(found_users)
         return {
             'success': True,
-            "users_data": users
+            "users_data": found_users
         }, 200
 
 
@@ -78,12 +83,23 @@ def login():
     }
     if request.method == "GET":
         return render_template("login.html")
-    print(request.form)
     email, password = request.form.get('email'), request.form.get('password')
+
+    password_validate = validate_password(password)
+    email_validate = validate_email(email)
+
+    if not password_validate["success"] and password_validate["errors"]:
+        return render_template("login.html", errors=password_validate["errors"])
+
+    if not email_validate["success"] and email_validate["errors"]:
+        return render_template("login.html", errors=email_validate["errors"])
+
     if email == test_user_data['email'] and password != test_user_data['password']:
-        return render_template("login.html", error="Password doesnt match!")
+        return render_template("login.html",
+                               error="Password doesnt match!")
     if email != test_user_data['email']:
-        return render_template("login.html", error="Account with this email doesnt exist!")
+        return render_template("login.html",
+                               error="Account with this email doesnt exist!")
     if email == test_user_data['email'] and password == test_user_data["password"]:
         return redirect(url_for("home"))
 
