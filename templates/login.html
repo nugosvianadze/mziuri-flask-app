@@ -108,7 +108,7 @@
 
         <div class="input-group">
             <label>Password</label>
-            <input type="password" id="password" required name="password">
+            <input type="password" id="password" required name="password" maxlength="20" minlength="6">
         </div>
 
         <button class="login-btn" type="submit">Login</button>
@@ -117,9 +117,9 @@
     <div class="footer">
         Don’t have an account? <a href="#">Sign up</a>
     </div>
-    {% if error %}
+    {% if errors %}
 
-      <span style="color: red">{{error}}</span>
+      <span style="color: red">{{ errors | join('<br><br>')| safe}}</span>
     {% endif %}
 </div>
 
