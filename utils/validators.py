@@ -1,17 +1,6 @@
+from utils.consts import (PASSWORD_ERROR_MSGS,
+                    SYMBOLS_CONST, EMAIL_ERROR_DEFAULT)
 
-SYMBOLS_CONST = [
-    '!', '@', '#', '$', '%', '^', '&', '*', '(', ')',
-    '-', '_', '=', '+', '[', ']', '{', '}', '|', '\\',
-    ':', ';', '"', "'", '<', '>', ',', '.', '?', '/'
-]
-
-PASSWORD_ERROR_MSGS = {
-    "min_passw_len": "Password min length is 6",
-    "upper_case": "Password must include at least one upper case letter!",
-    "symbols": "Password must include at least one symbol!"
-}
-
-EMAIL_ERROR_DEFAULT = "Wrong Email Format!"
 
 def validate_password(password: str) -> dict:
     errors: list = list()

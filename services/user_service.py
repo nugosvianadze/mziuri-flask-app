@@ -14,7 +14,8 @@ class UserService:
 
 
     @staticmethod
-    def get_user_with_id(u_id: int, users: list) -> dict:
+    def get_user_with_id(u_id: int, users: list) -> dict | None:
         for user in users:
             if u_id == user["id"]:
                 return user
+        return None

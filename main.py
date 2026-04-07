@@ -2,7 +2,7 @@ from flask import (Flask, render_template,
                    request, url_for, redirect)
 from flask_cors import CORS
 
-from services.validators import validate_password, validate_email
+from utils.validators import validate_password, validate_email
 from services.user_service import UserService
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "http://localhost:63342"}})
@@ -34,8 +34,8 @@ def home():
 
 
 # API endpoint
-@app.route("/api/user_data/<int:user_id>")
-@app.route("/api/user_data")
+@app.route("/api/user_data/<int:user_id>", methods=["GET"])
+@app.route("/api/user_data", methods=["GET"])
 def user_data(user_id: int = None):
     found_users = []
 
@@ -46,33 +46,103 @@ def user_data(user_id: int = None):
 
     elif user_id is not None and first_name is None:
         user = UserService.get_user_with_id(user_id, users)
-        return user
+        return {
+            "success": True,
+            "message": None,
+            "data": user
+        }, 200
 
     elif user_id and first_name:
         user = UserService.get_user_with_id(user_id, users)
-        print(user)
         UserService.get_users_with_word(first_name, [user], found_users)
-        print(found_users)
         return {
             'success': True,
-            "users_data": found_users
+            "data": found_users,
+            "message": None
         }, 200
 
 
     if not found_users and user_id:
         return {
             "success": False,
-            "message": f"User with ID={user_id} not found!"
+            "message": f"User with ID={user_id} not found!",
+            "data": None
         }, 404
     elif not found_users and first_name:
         return {
             "success": False,
-            "message": f"Users with first_name={first_name} not found!"
+            "message": f"Users with first_name={first_name} not found!",
+            "data": None
         }, 404
     return {
         "success": True,
-        "message": found_users
+        "data": found_users,
+        "message": None
     }, 200
+
+
+@app.route("/api/user_data/<int:user_id>", methods=["PUT"])
+def update_user_data(user_id: int):
+    data = request.json
+    if user_id and isinstance(user_id, int):
+        user = UserService.get_user_with_id(user_id, users)
+        first_name, last_name, age = (data.get("first_name"), data.get("last_name"),
+                                      data.get("age"))
+        if user is not None:
+            for usr in users:
+                if user_id == usr["id"]:
+                    usr["first_name"] = first_name
+                    usr["last_name"] = last_name
+                    usr["age"] = age
+                    return {
+                        "success": True,
+                        "message": f"User with id {user_id} successfully deleted",
+                        "data": users
+                    }
+
+        return {
+            "success": False,
+            "message": f"User with id {user_id} was not found!",
+            "data": None
+        }
+    return {
+        "success": False,
+        "message": "user id param is not valid, try again!",
+        "data": None
+    }
+
+
+@app.route("/api/user_data/<int:user_id>", methods=["PATCH"])
+def partial_update_user_data(user_id: int):
+    data = request.json
+    method = request.method
+    if user_id and isinstance(user_id, int):
+        user = UserService.get_user_with_id(user_id, users)
+        first_name, last_name, age = (data.get("first_name"), data.get("last_name"),
+                                      data.get("age"))
+        if user is not None:
+            for usr in users:
+                if user_id == usr["id"]:
+                    usr["first_name"] = first_name if first_name else usr["first_name"]
+                    usr["last_name"] = last_name if last_name else usr["last_name"]
+                    usr["age"] = age if age else usr["age"]
+
+                    return {
+                        "success": True,
+                        "message": f"User with id {user_id} successfully deleted",
+                        "data": users
+                    }
+
+        return {
+            "success": False,
+            "message": f"User with id {user_id} was not found!",
+            "data": None
+        }
+    return {
+        "success": False,
+        "message": "user id param is not valid, try again!",
+        "data": None
+    }
 
 
 @app.route("/login", methods=["GET", "POST"])
