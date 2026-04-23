@@ -1,11 +1,24 @@
 from flask import (Flask, render_template,
                    request, url_for, redirect)
 from flask_cors import CORS
+import click
+import sqlite3
 
 from utils.validators import validate_password, validate_email
 from services.user_service import UserService
+from db import init_db
+
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "http://localhost:63342"}})
+
+
+DB_PATH = "instances/mziuri.db"
+
+
+def get_db():
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory =  sqlite3.Row
+    return conn
 
 
 @app.errorhandler(404)
@@ -39,46 +52,53 @@ def home():
 def user_data(user_id: int = None):
     found_users = []
 
-    first_name = request.args.get("first_name")
+    name = request.args.get("name")
 
-    if user_id is None and first_name is not None:
-        UserService.get_users_with_word(first_name, users, found_users)
-
-    elif user_id is not None and first_name is None:
-        user = UserService.get_user_with_id(user_id, users)
-        return {
-            "success": True,
-            "message": None,
-            "data": user
-        }, 200
-
-    elif user_id and first_name:
-        user = UserService.get_user_with_id(user_id, users)
-        UserService.get_users_with_word(first_name, [user], found_users)
-        return {
-            'success': True,
-            "data": found_users,
-            "message": None
-        }, 200
-
-
-    if not found_users and user_id:
-        return {
-            "success": False,
-            "message": f"User with ID={user_id} not found!",
-            "data": None
-        }, 404
-    elif not found_users and first_name:
-        return {
-            "success": False,
-            "message": f"Users with first_name={first_name} not found!",
-            "data": None
-        }, 404
-    return {
-        "success": True,
-        "data": found_users,
-        "message": None
-    }, 200
+    conn = get_db()
+    cursor = conn.cursor()
+    if user_id is None and name is not None:
+        # UserService.get_users_with_word(name, users, found_users)
+        cursor.execute("""
+        select * from users where first_name like ? or last_name like ?
+        """, (f'%{name}%', f'%{name}%'))
+        users = cursor.fetchone()
+        print(users)
+        return {"status": "ok", "first_name": users["first_name"]}
+    # elif user_id is not None and name is None:
+    #     user = UserService.get_user_with_id(user_id, users)
+    #     return {
+    #         "success": True,
+    #         "message": None,
+    #         "data": user
+    #     }, 200
+    #
+    # elif user_id and name:
+    #     user = UserService.get_user_with_id(user_id, users)
+    #     UserService.get_users_with_word(name, [user], found_users)
+    #     return {
+    #         'success': True,
+    #         "data": found_users,
+    #         "message": None
+    #     }, 200
+    #
+    #
+    # if not found_users and user_id:
+    #     return {
+    #         "success": False,
+    #         "message": f"User with ID={user_id} not found!",
+    #         "data": None
+    #     }, 404
+    # elif not found_users and name:
+    #     return {
+    #         "success": False,
+    #         "message": f"Users with first_name={name} not found!",
+    #         "data": None
+    #     }, 404
+    # return {
+    #     "success": True,
+    #     "data": found_users,
+    #     "message": None
+    # }, 200
 
 
 @app.route("/api/user_data/<int:user_id>", methods=["PUT"])
@@ -144,6 +164,44 @@ def partial_update_user_data(user_id: int):
         "data": None
     }
 
+@app.route("/api/user_data", methods=["POST"])
+def create_user():
+    """
+
+    {"first_name": "nugo"}
+    """
+    data = request.json
+    print(data)
+    conn = get_db()
+    if data:
+        try:
+
+            first_name, last_name, age = (data.get("first_name"),
+                                          data.get("last_name"), data.get("age"))
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                insert into users (first_name, last_name, age) values (?, ?, ?)
+                """,
+                (first_name, last_name, age)
+            )
+            conn.commit()
+            conn.close()
+            return {
+                "success": True,
+                "message": "User Successfully Created!",
+                "data": {
+                    "first_name": first_name
+                }
+            }
+        except Exception as e:
+            print('Error', e)
+            conn.rollback()
+    return {
+        "success": False,
+        "message": "Data is not provided!",
+        "data": None
+    }
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -180,6 +238,11 @@ def test_args():
     print(request.args.get('arg1'))
     return request.args
 
+
+@app.cli.command("init-db")
+def init_db_command():
+    init_db()
+    click.echo("Database initialized.")
 
 if __name__ == "__main__":
 

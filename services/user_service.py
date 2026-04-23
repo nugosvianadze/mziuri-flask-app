@@ -1,9 +1,9 @@
 class UserService:
     @staticmethod
-    def get_users_with_word(word: str, users: list, found_users: list):
+    def get_users_with_word(name: str, users: list, found_users: list):
         is_found = False
         for user in users:
-            if user and word.lower() in f"{user["first_name"]} {user["last_name"]}".lower():
+            if user and name.lower() in f"{user["first_name"]} {user["last_name"]}".lower():
                 print('shemovida')
                 found_users.append(user)
                 is_found = True
