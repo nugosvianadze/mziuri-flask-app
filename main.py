@@ -14,6 +14,8 @@ CORS(app, resources={r"/api/*": {"origins": "http://localhost:63342"}})
 
 DB_PATH = "instances/mziuri.db"
 
+user_service = UserService()
+
 
 def get_db():
     conn = sqlite3.connect(DB_PATH)
@@ -25,144 +27,85 @@ def get_db():
 def page_not_found(error):
     return redirect(url_for("home"))
 
-users = [
-    {"id": 1, "first_name": "John", "last_name": "Doe", "age": 28},
-    {"id": 2, "first_name": "Jane", "last_name": "Smith", "age": 34},
-    {"id": 3, "first_name": "Michael", "last_name": "Johnson", "age": 45},
-    {"id": 4, "first_name": "Olivia", "last_name": "Davis", "age": 22},
-    {"id": 5, "first_name": "William", "last_name": "Brown", "age": 39},
-    {"id": 6, "first_name": "Olivia", "last_name": "Wilson", "age": 27},
-    {"id": 7, "first_name": "James", "last_name": "Taylor", "age": 31},
-    {"id": 8, "first_name": "Sophia", "last_name": "Anderson", "age": 24},
-    {"id": 9, "first_name": "Olivia", "last_name": "Thomas", "age": 36},
-    {"id": 10, "first_name": "Isabella", "last_name": "Moore", "age": 29}
-]
-
 
 @app.route("/home", methods=["GET"])
 @app.route("/")
 def home():
-    print(request.method)
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("select * from users")
+    users = cursor.fetchall()
+    conn.close()
     return render_template("index.html", users=users)
 
 
 # API endpoint
-@app.route("/api/user_data/<int:user_id>", methods=["GET"])
 @app.route("/api/user_data", methods=["GET"])
-def user_data(user_id: int = None):
-    found_users = []
-
+def user_data():
     name = request.args.get("name")
 
-    conn = get_db()
-    cursor = conn.cursor()
-    if user_id is None and name is not None:
-        # UserService.get_users_with_word(name, users, found_users)
-        cursor.execute("""
-        select * from users where first_name like ? or last_name like ?
-        """, (f'%{name}%', f'%{name}%'))
-        users = cursor.fetchone()
-        print(users)
-        return {"status": "ok", "first_name": users["first_name"]}
-    # elif user_id is not None and name is None:
-    #     user = UserService.get_user_with_id(user_id, users)
-    #     return {
-    #         "success": True,
-    #         "message": None,
-    #         "data": user
-    #     }, 200
-    #
-    # elif user_id and name:
-    #     user = UserService.get_user_with_id(user_id, users)
-    #     UserService.get_users_with_word(name, [user], found_users)
-    #     return {
-    #         'success': True,
-    #         "data": found_users,
-    #         "message": None
-    #     }, 200
-    #
-    #
-    # if not found_users and user_id:
-    #     return {
-    #         "success": False,
-    #         "message": f"User with ID={user_id} not found!",
-    #         "data": None
-    #     }, 404
-    # elif not found_users and name:
-    #     return {
-    #         "success": False,
-    #         "message": f"Users with first_name={name} not found!",
-    #         "data": None
-    #     }, 404
-    # return {
-    #     "success": True,
-    #     "data": found_users,
-    #     "message": None
-    # }, 200
+    if name:
+        users = user_service.get_users_with_word(name)
+        return users
+    return user_service.get_all_users()
+
+@app.route("/api/user_data/<int:user_id>", methods=["GET"])
+def get_user(user_id: int):
+    try:
+        data = user_service.get_user_with_id(user_id)
+        return data
+    except Exception as e:
+        return {
+            "success": False,
+            "message": e
+        }
+
 
 
 @app.route("/api/user_data/<int:user_id>", methods=["PUT"])
 def update_user_data(user_id: int):
     data = request.json
     if user_id and isinstance(user_id, int):
-        user = UserService.get_user_with_id(user_id, users)
-        first_name, last_name, age = (data.get("first_name"), data.get("last_name"),
-                                      data.get("age"))
-        if user is not None:
-            for usr in users:
-                if user_id == usr["id"]:
-                    usr["first_name"] = first_name
-                    usr["last_name"] = last_name
-                    usr["age"] = age
-                    return {
-                        "success": True,
-                        "message": f"User with id {user_id} successfully deleted",
-                        "data": users
-                    }
-
-        return {
-            "success": False,
-            "message": f"User with id {user_id} was not found!",
-            "data": None
-        }
+        data = user_service.update_user(user_id, data)
+        return data
     return {
         "success": False,
         "message": "user id param is not valid, try again!",
         "data": None
     }
-
-
-@app.route("/api/user_data/<int:user_id>", methods=["PATCH"])
-def partial_update_user_data(user_id: int):
-    data = request.json
-    method = request.method
-    if user_id and isinstance(user_id, int):
-        user = UserService.get_user_with_id(user_id, users)
-        first_name, last_name, age = (data.get("first_name"), data.get("last_name"),
-                                      data.get("age"))
-        if user is not None:
-            for usr in users:
-                if user_id == usr["id"]:
-                    usr["first_name"] = first_name if first_name else usr["first_name"]
-                    usr["last_name"] = last_name if last_name else usr["last_name"]
-                    usr["age"] = age if age else usr["age"]
-
-                    return {
-                        "success": True,
-                        "message": f"User with id {user_id} successfully deleted",
-                        "data": users
-                    }
-
-        return {
-            "success": False,
-            "message": f"User with id {user_id} was not found!",
-            "data": None
-        }
-    return {
-        "success": False,
-        "message": "user id param is not valid, try again!",
-        "data": None
-    }
+#
+#
+# @app.route("/api/user_data/<int:user_id>", methods=["PATCH"])
+# def partial_update_user_data(user_id: int):
+#     data = request.json
+#     method = request.method
+#     if user_id and isinstance(user_id, int):
+#         user = UserService.get_user_with_id(user_id, users)
+#         first_name, last_name, age = (data.get("first_name"), data.get("last_name"),
+#                                       data.get("age"))
+#         if user is not None:
+#             for usr in users:
+#                 if user_id == usr["id"]:
+#                     usr["first_name"] = first_name if first_name else usr["first_name"]
+#                     usr["last_name"] = last_name if last_name else usr["last_name"]
+#                     usr["age"] = age if age else usr["age"]
+#
+#                     return {
+#                         "success": True,
+#                         "message": f"User with id {user_id} successfully deleted",
+#                         "data": users
+#                     }
+#
+#         return {
+#             "success": False,
+#             "message": f"User with id {user_id} was not found!",
+#             "data": None
+#         }
+#     return {
+#         "success": False,
+#         "message": "user id param is not valid, try again!",
+#         "data": None
+#     }
 
 @app.route("/api/user_data", methods=["POST"])
 def create_user():
@@ -172,6 +115,7 @@ def create_user():
     """
     data = request.json
     print(data)
+    print(request.get_json())
     conn = get_db()
     if data:
         try:
@@ -231,6 +175,10 @@ def login():
     if email == test_user_data['email'] and password == test_user_data["password"]:
         return redirect(url_for("home"))
 
+@app.route("/api/user_data/<int:user_id>", methods=["DELETE"])
+def delete_user(user_id: int) -> dict:
+    data = user_service.delete_user(user_id)
+    return data
 
 @app.route('/test_args')
 def test_args():

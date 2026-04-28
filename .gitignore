@@ -5,3 +5,5 @@ venv
 *.sqlite
 *.dbsqlite3
 *.db
+sqlite
+*.xml
