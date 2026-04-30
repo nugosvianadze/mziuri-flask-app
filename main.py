@@ -1,27 +1,56 @@
 from flask import (Flask, render_template,
                    request, url_for, redirect)
 from flask_cors import CORS
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+
 import click
 import sqlite3
 
 from utils.validators import validate_password, validate_email
 from services.user_service import UserService
-from db import init_db
+
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "http://localhost:63342"}})
 
 
-DB_PATH = "instances/mziuri.db"
+DB_PATH = "mziuri.db"
 
 user_service = UserService()
+
+class Base(DeclarativeBase):
+  pass
+
+db = SQLAlchemy(model_class=Base)
+
+app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_PATH}"
+db.init_app(app)
+
+
+class User(db.Model):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    first_name: Mapped[str | None]
+    last_name: Mapped[str | None]
+    age: Mapped[int]
+
+    def to_dict(self):
+        return {
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "age": self.age
+        }
+
+
+class Posts(db.Model):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str]
 
 
 def get_db():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory =  sqlite3.Row
     return conn
-
 
 @app.errorhandler(404)
 def page_not_found(error):
@@ -45,7 +74,7 @@ def user_data():
     name = request.args.get("name")
 
     if name:
-        users = user_service.get_users_with_word(name)
+        users = user_service.get_users_with_word(name, db)
         return users
     return user_service.get_all_users()
 
@@ -114,23 +143,18 @@ def create_user():
     {"first_name": "nugo"}
     """
     data = request.json
-    print(data)
-    print(request.get_json())
-    conn = get_db()
     if data:
         try:
 
             first_name, last_name, age = (data.get("first_name"),
                                           data.get("last_name"), data.get("age"))
-            cursor = conn.cursor()
-            cursor.execute(
-                """
-                insert into users (first_name, last_name, age) values (?, ?, ?)
-                """,
-                (first_name, last_name, age)
+            user = User(
+                first_name=first_name,
+                last_name=last_name,
+                age=age
             )
-            conn.commit()
-            conn.close()
+            db.session.add(user)
+            db.session.commit()
             return {
                 "success": True,
                 "message": "User Successfully Created!",
@@ -140,7 +164,7 @@ def create_user():
             }
         except Exception as e:
             print('Error', e)
-            conn.rollback()
+            db.session.rollback()
     return {
         "success": False,
         "message": "Data is not provided!",
@@ -189,9 +213,16 @@ def test_args():
 
 @app.cli.command("init-db")
 def init_db_command():
-    init_db()
+    db.create_all()
     click.echo("Database initialized.")
 
+@app.cli.command("drop-all-tables")
+def drop_all_tables():
+    db.drop_all()
+    click.echo("Database cleared!")
+
+
 if __name__ == "__main__":
+
 
     app.run(host="0.0.0.0", debug=True)

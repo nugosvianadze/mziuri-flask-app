@@ -1,29 +1,29 @@
 import sqlite3
 
+from flask_sqlalchemy import SQLAlchemy
+
 from config import DB_PATH
 
 
 class UserService:
 
-    @staticmethod
-    def _get_db():
-        conn = sqlite3.connect(DB_PATH)
-        conn.row_factory = sqlite3.Row
-        return conn
+    # @staticmethod
+    # def _get_db():
+    #     conn = sqlite3.connect(DB_PATH)
+    #     conn.row_factory = sqlite3.Row
+    #     return conn
 
 
-    def get_users_with_word(self, name: str):
+    def get_users_with_word(self, name: str, db: SQLAlchemy):
+        from main import User
+
         data = {}
-        conn = self._get_db()
-        cursor = conn.cursor()
         if name is not None:
-            cursor.execute("""
-                select * from users where first_name like ? or last_name like ?
-                """, (f'%{name}%', f'%{name}%'))
-            users = cursor.fetchall()
-            users = [dict(user) for user in users]
-            data = {"success": True, "data": users}
-        conn.close()
+            query = db.session.query(User).filter(User.first_name.like(f"%{name}%") | User.last_name.like(f"%{name}%"))
+            result = db.session.execute(query)
+            result = result.scalars().all()
+            result = [user.to_dict() for user in result]
+            data = {"success": True, "data": result}
         if data:
             return data
         return {"success": False, "data": []}
