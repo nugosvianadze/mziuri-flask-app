@@ -33,6 +33,7 @@
             <th>Firstname</th>
             <th>Lastname</th>
             <th>Age</th>
+            <th>Posts Count</th>
         </tr>
     </thead>
     <tbody>
@@ -42,6 +43,7 @@
                 <td>{{ user.first_name }}</td>
                 <td>{{ user.last_name }}</td>
                 <td>{{ user.age }}</td>
+                <td>{{ user.posts| length }}</td>
             </tr>
             {% endfor %}
     </tbody>

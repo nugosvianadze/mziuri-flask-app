@@ -1,6 +1,7 @@
 import sqlite3
 
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.exceptions import NotFound
 
 from config import DB_PATH
 
@@ -67,70 +68,59 @@ class UserService:
             "message": f"User with id={u_id} was not found!"
         }
 
-    def update_user(self, user_id: int, data):
+    def update_user(self, user_id: int, data, db: SQLAlchemy, user_cls):
         return_data = {}
-        conn = self._get_db()
-        cursor = conn.cursor()
-        cursor.execute("""
-        select * from users where id = ?
-        """, (user_id, ))
-        user = cursor.fetchone()
+        try:
+            user = db.get_or_404(user_cls, user_id)
+        except NotFound as e:
+            return {
+            "success": False,
+            "message": f"User with id={user_id}, not found!"
+        }, 404
         if user:
 
             first_name, last_name, age = (data.get("first_name"), data.get("last_name"),
                                           data.get("age"))
             is_all_provided = all([first_name, last_name, age])
             if is_all_provided:
-                cursor.execute("""
-                update users set first_name = ?, last_name = ?, age = ? where id = ?
-                """, (first_name, last_name, age, user_id))
-                conn.commit()
-                cursor.execute("""
-                        select * from users where id = ?
-                        """, (user_id,))
-                updated_user = cursor.fetchone()
+                user.first_name = first_name
+                user.last_name = last_name
+                user.age = age
+                db.session.commit()
                 return_data = {
                     "success": True,
                     "message": "User Successfully updated!",
-                    "data": dict(updated_user)
-                }
+                    "data": user.to_dict()
+                }, 200
             else:
                 return_data = {
                     "success": False,
                     "message": "Wrong paramaters, mandatory fields : first_name, last_name, age "
-                }
-        conn.close()
+                }, 400
         if return_data:
-            return return_data
-        return {
+            return return_data, 200
+
+
+    @staticmethod
+    def delete_user(user_id: int, db: SQLAlchemy, user_cls) -> tuple[dict, int]:
+        try:
+            user = db.get_or_404(user_cls, user_id)
+        except NotFound as e:
+            return {
             "success": False,
             "message": f"User with id={user_id}, not found!"
-        }
+        }, 404
 
-    def delete_user(self, user_id: int) -> dict:
-        conn = self._get_db()
-        cursor = conn.cursor()
         try:
-            cursor.execute("""
-            delete from users where id = ?
-            """, (user_id, ))
-
-            if cursor.rowcount == 0:
-                data = {
-                    "success": False,
-                    "message": f"User with id={user_id} was not found!"
-                }
-            else:
-                conn.commit()
-                data = {
-                    "success": True,
-                    "message": f"User with id={user_id} deleted successfully!"
-                }
-            conn.close()
-            return data
+            db.session.delete(user)
+            db.session.commit()
+            return {
+                "success": True,
+                "message": f"User with id={user_id} deleted successfully!"
+            }, 200
         except Exception as e:
-            conn.rollback()
+            db.session.rollback()
             return {
                 "success": False,
                 "message": e
-            }
+            }, 500

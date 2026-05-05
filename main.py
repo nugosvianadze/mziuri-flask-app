@@ -2,10 +2,13 @@ from flask import (Flask, render_template,
                    request, url_for, redirect)
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 import click
 import sqlite3
+
+from werkzeug.exceptions import NotFound
 
 from utils.validators import validate_password, validate_email
 from services.user_service import UserService
@@ -34,6 +37,11 @@ class User(db.Model):
     last_name: Mapped[str | None]
     age: Mapped[int]
 
+    posts: Mapped[list["Posts"]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+        passive_deletes=True
+    )
     def to_dict(self):
         return {
             "first_name": self.first_name,
@@ -45,6 +53,12 @@ class User(db.Model):
 class Posts(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str]
+
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("user.id", ondelete="CASCADE")
+    )
+
+    user: Mapped["User"] = relationship(back_populates="posts")
 
 
 def get_db():
@@ -60,12 +74,56 @@ def page_not_found(error):
 @app.route("/home", methods=["GET"])
 @app.route("/")
 def home():
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("select * from users")
-    users = cursor.fetchall()
-    conn.close()
+    users = db.session.execute(db.select(User).limit(10)).scalars().all()
     return render_template("index.html", users=users)
+
+
+@app.route("/api/posts/<int:user_id>", methods=["POST"])
+def create_post(user_id: int):
+    data = request.json
+    title = data.get("title")
+
+    if not title.strip():
+        return {
+            "success": False,
+            "message": "title field is required!"
+        }, 404
+
+    try:
+        user = db.get_or_404(User, user_id)
+    except NotFound as e:
+        return {
+            "success": False,
+            "message": f"User with id={user_id}, not found!"
+        }, 404
+
+    try:
+        # version 1
+        # post = Posts(
+        #     title=title,
+        #     user_id=user_id
+        # )
+        # db.session.add(post)
+        # db.session.commit()
+
+        # version 2
+        post = Posts(
+            title=title,
+        )
+        user.posts.append(post)
+        db.session.commit()
+        return {
+            "success": True,
+            "message": "post successfully created!",
+            "data": post.id
+        }
+    except Exception as e:
+        db.session.rollback()
+        return {
+            "success": False,
+            "message": "Try again later!"
+        }, 404
+
 
 
 # API endpoint
@@ -95,13 +153,13 @@ def get_user(user_id: int):
 def update_user_data(user_id: int):
     data = request.json
     if user_id and isinstance(user_id, int):
-        data = user_service.update_user(user_id, data)
-        return data
+        data, status_code = user_service.update_user(user_id, data, db, User)
+        return data, status_code
     return {
         "success": False,
         "message": "user id param is not valid, try again!",
         "data": None
-    }
+    }, 404
 #
 #
 # @app.route("/api/user_data/<int:user_id>", methods=["PATCH"])
@@ -200,9 +258,9 @@ def login():
         return redirect(url_for("home"))
 
 @app.route("/api/user_data/<int:user_id>", methods=["DELETE"])
-def delete_user(user_id: int) -> dict:
-    data = user_service.delete_user(user_id)
-    return data
+def delete_user(user_id: int) -> tuple[dict, int]:
+    data, status_code = user_service.delete_user(user_id, db, User)
+    return data, status_code
 
 @app.route('/test_args')
 def test_args():
