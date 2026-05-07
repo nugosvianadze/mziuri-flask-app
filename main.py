@@ -2,8 +2,9 @@ from flask import (Flask, render_template,
                    request, url_for, redirect)
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, Table, Column
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from flask_migrate import Migrate
 
 import click
 import sqlite3
@@ -15,6 +16,7 @@ from services.user_service import UserService
 
 
 app = Flask(__name__)
+migrate = Migrate()
 CORS(app, resources={r"/api/*": {"origins": "http://localhost:63342"}})
 
 
@@ -28,7 +30,10 @@ class Base(DeclarativeBase):
 db = SQLAlchemy(model_class=Base)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_PATH}"
+
+# initializations
 db.init_app(app)
+migrate.init_app(app, db)
 
 
 class User(db.Model):
@@ -42,6 +47,11 @@ class User(db.Model):
         cascade="all, delete-orphan",
         passive_deletes=True
     )
+    profile: Mapped["Profile"] = relationship(
+        back_populates="user",
+        uselist=False
+    )
+
     def to_dict(self):
         return {
             "first_name": self.first_name,
@@ -59,6 +69,45 @@ class Posts(db.Model):
     )
 
     user: Mapped["User"] = relationship(back_populates="posts")
+
+
+class Profile(Base):
+    __tablename__ = "profiles"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), unique=True)
+
+    user: Mapped["User"] = relationship(back_populates="profile")
+
+# many to many version 1
+
+association_table = Table(
+    "student_course",
+    Base.metadata,
+    Column("student_id", ForeignKey("students.id"), primary_key=True),
+    Column("course_id", ForeignKey("courses.id"), primary_key=True),
+)
+
+class Student(Base):
+    __tablename__ = "students"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    courses: Mapped[list["Course"]] = relationship(
+        secondary=association_table,
+        back_populates="students"
+    )
+
+
+class Course(Base):
+    __tablename__ = "courses"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    students: Mapped[list["Student"]] = relationship(
+        secondary=association_table,
+        back_populates="courses"
+    )
 
 
 def get_db():
@@ -134,7 +183,7 @@ def user_data():
     if name:
         users = user_service.get_users_with_word(name, db)
         return users
-    return user_service.get_all_users()
+    return user_service.get_all_users(db, User)
 
 @app.route("/api/user_data/<int:user_id>", methods=["GET"])
 def get_user(user_id: int):

@@ -29,13 +29,10 @@ class UserService:
             return data
         return {"success": False, "data": []}
 
-    def get_all_users(self):
+    def get_all_users(self, db, user):
         try:
-            conn = self._get_db()
-            cursor = conn.cursor()
-            cursor.execute("""select * from users limit 10""")
-            users = cursor.fetchall()
-            users_dict = [dict(user) for user in users]
+            users = db.session.execute(db.select(user).limit(10)).scalars().all()
+            users_dict = [user.to_dict() for user in users]
             return {
                 "success": True,
                 "data": users_dict

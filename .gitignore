@@ -7,3 +7,5 @@ venv
 *.db
 sqlite
 *.xml
+
+__pycache__/
