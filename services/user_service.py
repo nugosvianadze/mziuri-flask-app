@@ -5,7 +5,6 @@ from werkzeug.exceptions import NotFound
 
 from config import DB_PATH
 
-
 class UserService:
 
     # @staticmethod
@@ -43,23 +42,15 @@ class UserService:
                 "message": e
             }
 
-    def get_user_with_id(self, u_id: int) -> dict | None:
-        return_data = {}
-        conn = self._get_db()
-        cursor = conn.cursor()
-        cursor.execute("""
-                select * from users where id =?
-            """, (u_id,))
-        user = cursor.fetchone()
+    @staticmethod
+    def get_user_with_id(db: SQLAlchemy, user_cls, u_id: int) -> dict | None:
+        user = db.get_or_404(user_cls, u_id)
+        print(user)
         if user:
-            user = dict(user)
-            return_data = {
+            return {
                 "success": True,
-                "data": user
+                "user": user
             }
-        conn.close()
-        if return_data:
-            return return_data
         return {
             "success": False,
             "message": f"User with id={u_id} was not found!"
@@ -114,6 +105,41 @@ class UserService:
             return {
                 "success": True,
                 "message": f"User with id={user_id} deleted successfully!"
+            }, 200
+        except Exception as e:
+            db.session.rollback()
+            return {
+                "success": False,
+                "message": e
+            }, 500
+
+    @staticmethod
+    def create_user(db, user_cls, first_name: str,
+                    last_name: str, age: int) -> tuple[dict, int]:
+        if not age:
+            return {
+                "success": False,
+                "message": "Age field is required!"
+            }, 400
+
+        if not isinstance(first_name, str) or not isinstance(last_name, str):
+            return {
+                "success": False,
+                "message": "First name or Last name field must be string type"
+            }, 400
+
+        try:
+            user = user_cls(
+            first_name=first_name,
+            last_name=last_name,
+            age=age
+            )
+            db.session.add(user)
+            db.session.commit()
+            return {
+                "success": True,
+                "message": "User Successfully Created!",
+                "data": user.to_dict()
             }, 200
         except Exception as e:
             db.session.rollback()

@@ -2,7 +2,7 @@ from flask import (Flask, render_template,
                    request, url_for, redirect)
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import ForeignKey, Table, Column
+from sqlalchemy import ForeignKey, Table, Column, String
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from flask_migrate import Migrate
 
@@ -59,17 +59,32 @@ class User(db.Model):
             "age": self.age
         }
 
+    def to_dict_with_posts(self):
+        data = {
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "age": self.age,
+            "posts": [post.to_dict() for post in self.posts]
+        }
+        return data
+
+
 
 class Posts(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
-    title: Mapped[str]
-
+    title: Mapped[str] = mapped_column(String(500))
+    description: Mapped[str | None]
     user_id: Mapped[int] = mapped_column(
         ForeignKey("user.id", ondelete="CASCADE")
     )
 
     user: Mapped["User"] = relationship(back_populates="posts")
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "title": self.title
+        }
 
 class Profile(Base):
     __tablename__ = "profiles"
@@ -123,7 +138,7 @@ def page_not_found(error):
 @app.route("/home", methods=["GET"])
 @app.route("/")
 def home():
-    users = db.session.execute(db.select(User).limit(10)).scalars().all()
+    users = db.session.scalars(db.select(User).limit(10)).all()
     return render_template("index.html", users=users)
 
 
@@ -188,8 +203,12 @@ def user_data():
 @app.route("/api/user_data/<int:user_id>", methods=["GET"])
 def get_user(user_id: int):
     try:
-        data = user_service.get_user_with_id(user_id)
-        return data
+        u_data = user_service.get_user_with_id(db, User, user_id)
+        if u_data:
+            return {
+                "success": u_data["success"],
+                "data": u_data["user"].to_dict()
+            }
     except Exception as e:
         return {
             "success": False,
@@ -251,32 +270,33 @@ def create_user():
     """
     data = request.json
     if data:
-        try:
+        data, status_code = user_service.create_user(db,
+                                        User,
+                                        data.get("first_name"),
+                                        data.get("last_name"),
+                                        data.get("age"))
 
-            first_name, last_name, age = (data.get("first_name"),
-                                          data.get("last_name"), data.get("age"))
-            user = User(
-                first_name=first_name,
-                last_name=last_name,
-                age=age
-            )
-            db.session.add(user)
-            db.session.commit()
-            return {
-                "success": True,
-                "message": "User Successfully Created!",
-                "data": {
-                    "first_name": first_name
-                }
-            }
-        except Exception as e:
-            print('Error', e)
-            db.session.rollback()
+        return data, status_code
     return {
         "success": False,
         "message": "Data is not provided!",
         "data": None
     }
+
+@app.route("/api/user_posts/<int:user_id>")
+def get_user_posts(user_id: int) -> tuple[dict, int]:
+    try:
+        u_data = user_service.get_user_with_id(db, User, user_id)
+        user_posts = u_data["user"].to_dict_with_posts()
+        return {
+            "success": True,
+            "data": user_posts
+        }, 200
+    except Exception as e:
+        return {
+            "success": False,
+            "message": e.description
+        }, 500
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
