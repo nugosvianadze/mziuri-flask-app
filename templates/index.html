@@ -1,56 +1,93 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<style>
-    table {
-        width: 100%;
-        border-collapse: collapse; /* Merges the borders into a single line */
-        margin-top: 20px;
-    }
-    th, td {
-        border: 1px solid #ddd; /* Adds a border to cells */
-        padding: 8px; /* Adds space between content and border */
-        text-align: left; /* Aligns text to the left */
-    }
-    th {
-        background-color: #f2f2f2; /* Grey background for headers */
-    }
-    tr:nth-child(even) {
-        background-color: #f9f9f9; /* Zebra-striping for rows */
-    }
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Page</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 40px;
+        }
+
+        .container {
+            width: 500px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .logout-btn {
+            display: block;
+            width: 120px;
+            margin: 25px auto 0;
+            text-align: center;
+            padding: 10px;
+            background-color: #e74c3c;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+    </style>
 </head>
 <body>
 
-<h2>User Information Table</h2>
+<div class="container">
 
-    {% if users %}
+    <h1>Home Page</h1>
 
-<table>
-    <thead>
+    <table>
         <tr>
-            <th>Firstname</th>
-            <th>Lastname</th>
-            <th>Age</th>
-            <th>Posts Count</th>
+            <th>First Name</th>
+            <td>{{ session.first_name }}</td>
         </tr>
-    </thead>
-    <tbody>
 
-            {% for user in users %}
-            <tr>
-                <td>{{ user.first_name }}</td>
-                <td>{{ user.last_name }}</td>
-                <td>{{ user.age }}</td>
-                <td>{{ user.posts| length }}</td>
-            </tr>
-            {% endfor %}
-    </tbody>
-</table>
-{% else %}
-No Users Data
-{% endif %}
+        <tr>
+            <th>Last Name</th>
+            <td>{{ session.last_name }}</td>
+        </tr>
+    </table>
+
+    {% if session.user_id %}
+    <a href="{{ url_for('logout') }}" class="logout-btn">
+        Logout
+    </a>
+    {% endif %}
+
+</div>
 
 </body>
 </html>

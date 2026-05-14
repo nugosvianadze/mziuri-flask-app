@@ -1,5 +1,5 @@
 from flask import (Flask, render_template,
-                   request, url_for, redirect)
+                   request, url_for, redirect, session)
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import ForeignKey, Table, Column, String
@@ -30,6 +30,7 @@ class Base(DeclarativeBase):
 db = SQLAlchemy(model_class=Base)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_PATH}"
+app.config["SECRET_KEY"] = "NSDISUDUSBDUSBDIUB1h23ib12uibudusadbashidbasudbasiohio"
 
 # initializations
 db.init_app(app)
@@ -40,6 +41,8 @@ class User(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     first_name: Mapped[str | None]
     last_name: Mapped[str | None]
+    email: Mapped[str | None]
+    password: Mapped[str | None]
     age: Mapped[int]
 
     posts: Mapped[list["Posts"]] = relationship(
@@ -56,7 +59,10 @@ class User(db.Model):
         return {
             "first_name": self.first_name,
             "last_name": self.last_name,
-            "age": self.age
+            "age": self.age,
+            "id": self.id,
+            "email": self.email,
+            "password": self.password
         }
 
     def to_dict_with_posts(self):
@@ -138,6 +144,8 @@ def page_not_found(error):
 @app.route("/home", methods=["GET"])
 @app.route("/")
 def home():
+    if not session.get("user_id"):
+        return redirect(url_for("login"))
     users = db.session.scalars(db.select(User).limit(10)).all()
     return render_template("index.html", users=users)
 
@@ -179,7 +187,7 @@ def create_post(user_id: int):
         return {
             "success": True,
             "message": "post successfully created!",
-            "data": post.id
+            "data": post.to_dict()
         }
     except Exception as e:
         db.session.rollback()
@@ -300,10 +308,6 @@ def get_user_posts(user_id: int) -> tuple[dict, int]:
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    test_user_data = {
-        'email': "test@gmail.com",
-        'password': "123456"
-    }
     if request.method == "GET":
         return render_template("login.html")
     email, password = request.form.get('email'), request.form.get('password')
@@ -317,14 +321,29 @@ def login():
     if not email_validate["success"] and email_validate["errors"]:
         return render_template("login.html", errors=email_validate["errors"])
 
-    if email == test_user_data['email'] and password != test_user_data['password']:
+    users = db.session.execute(db.select(User).limit(10)).scalars().all()
+    users_dict = [user.to_dict() for user in users]
+    print(users_dict)
+    print(email, password)
+    query = db.session.query(User).filter(User.email == email.strip(),
+                                         User.password == password.strip())
+    execute = db.session.execute(query)
+    user = execute.scalar()
+    print(user)
+    if not user:
         return render_template("login.html",
-                               error="Password doesnt match!")
-    if email != test_user_data['email']:
-        return render_template("login.html",
-                               error="Account with this email doesnt exist!")
-    if email == test_user_data['email'] and password == test_user_data["password"]:
-        return redirect(url_for("home"))
+                               error="Incorrect Credentials, Try again!")
+    session["user_id"] = user.id
+    session["first_name"] = user.first_name
+    session["last_name"] = user.last_name
+    return redirect(url_for("home"))
+
+@app.route("/logout")
+def logout():
+    session.pop("user_id", None)
+    session.pop("first_name", None)
+    session.pop("last_name", None)
+    return redirect(url_for("login"))
 
 @app.route("/api/user_data/<int:user_id>", methods=["DELETE"])
 def delete_user(user_id: int) -> tuple[dict, int]:
@@ -350,6 +369,5 @@ def drop_all_tables():
 
 
 if __name__ == "__main__":
-
 
     app.run(host="0.0.0.0", debug=True)
