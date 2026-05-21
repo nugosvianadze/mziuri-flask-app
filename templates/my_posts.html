@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Posts</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<main class="page">
+    <div class="shell">
+        <section class="hero">
+            <div>
+                <span class="pill">My posts</span>
+                <h1>Stories in progress.</h1>
+                <p>A clean grid of your latest entries. Replace with dynamic data later.</p>
+                <div class="nav">
+                    <a href="/">Landing</a>
+                    <a href="/profile">Profile</a>
+                    <a href="/create-post">Create Post</a>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Writing stats</h3>
+                <p>Your strongest week this month.</p>
+                <div class="stats">
+                    <div class="stat">
+                        <span>5</span>
+                        Drafts
+                    </div>
+                    <div class="stat">
+                        <span>9</span>
+                        Published
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-title">
+            <h2>Recent posts</h2>
+            <span class="tag">Static</span>
+        </div>
+        <section class="card-grid">
+            <article class="card">
+                <h3>Notes from the morning ferry</h3>
+                <p>Short reflections on light, waves, and commuter rituals.</p>
+                <div class="nav">
+                    <a href="/post/1">View</a>
+                    <a href="/post/1/edit">Edit</a>
+                    <form action="/post/1/publish" method="post">
+                        <button class="button" type="submit">Publish</button>
+                    </form>
+                </div>
+            </article>
+            <article class="card">
+                <h3>Studio lighting experiments</h3>
+                <p>A mini log of new palette tests and texture overlays.</p>
+                <div class="nav">
+                    <a href="/post/2">View</a>
+                    <a href="/post/2/edit">Edit</a>
+                    <form action="/post/2/draft" method="post">
+                        <button class="button secondary" type="submit">Mark as Draft</button>
+                    </form>
+                </div>
+            </article>
+            <article class="card">
+                <h3>Map of secret bookstores</h3>
+                <p>A curated list with mood shots and audio cues.</p>
+                <div class="nav">
+                    <a href="/post/3">View</a>
+                    <a href="/post/3/edit">Edit</a>
+                    <form action="/post/3/draft" method="post">
+                        <button class="button secondary" type="submit">Mark as Draft</button>
+                    </form>
+                </div>
+            </article>
+            <article class="card">
+                <h3>Three prompts for slow journaling</h3>
+                <p>Gentle prompts you can turn into weekly posts.</p>
+                <div class="nav">
+                    <a href="/post/4">View</a>
+                    <a href="/post/4/edit">Edit</a>
+                    <form action="/post/4/publish" method="post">
+                        <button class="button" type="submit">Publish</button>
+                    </form>
+                </div>
+            </article>
+        </section>
+    </div>
+</main>
+</body>
+</html>
