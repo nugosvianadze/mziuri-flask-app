@@ -44,6 +44,11 @@ class User(db.Model):
     email: Mapped[str | None]
     password: Mapped[str | None]
     age: Mapped[int]
+    # Suggested fields for full implementation:
+    # username: unique, display name
+    # avatar_url: profile image
+    # bio: short profile text
+    # created_at / updated_at: timestamps
 
     posts: Mapped[list["Posts"]] = relationship(
         back_populates="user",
@@ -83,6 +88,13 @@ class Posts(db.Model):
     user_id: Mapped[int] = mapped_column(
         ForeignKey("user.id", ondelete="CASCADE")
     )
+    # Suggested fields for full implementation:
+    # body: long text content
+    # status: str (draft, published)
+    # views_count: int default 0
+    # likes_count: int default 0
+    # published_at: datetime
+    # created_at / updated_at: timestamps
 
     user: Mapped["User"] = relationship(back_populates="posts")
 
@@ -97,6 +109,10 @@ class Profile(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), unique=True)
+    # Suggested fields for full implementation:
+    # location: string
+    # website_url: string
+    # socials_json: serialized links
 
     user: Mapped["User"] = relationship(back_populates="profile")
 
@@ -148,6 +164,50 @@ def home():
         return redirect(url_for("login"))
     users = db.session.scalars(db.select(User).limit(10)).all()
     return render_template("index.html", users=users)
+
+# Static template routes (commented out for now)
+# @app.route("/profile")
+# def profile_page():
+#     return render_template("profile.html")
+#
+# @app.route("/my-posts")
+# def my_posts_page():
+#     return render_template("my_posts.html")
+#
+# @app.route("/create-post")
+# def create_post_page():
+#     return render_template("create_post.html")
+#
+# @app.route("/search")
+# def search_results_page():
+#     return render_template("search_results.html")
+#
+# @app.route("/register")
+# def register_page():
+#     return render_template("register.html")
+#
+# @app.route("/post/<int:post_id>")
+# def post_detail_page(post_id: int):
+#     return render_template("post_detail.html")
+
+# Placeholder routes for publish workflow
+# @app.route("/post/<int:post_id>/publish", methods=["POST"])
+# def publish_post(post_id: int):
+#     return {
+#         "success": True,
+#         "message": f"Post {post_id} published (placeholder)"
+#     }
+
+# @app.route("/post/<int:post_id>/draft", methods=["POST"])
+# def mark_post_as_draft(post_id: int):
+#     return {
+#         "success": True,
+#         "message": f"Post {post_id} moved to draft (placeholder)"
+#     }
+
+# @app.route("/post/<int:post_id>/edit", methods=["GET"])
+# def edit_post_page(post_id: int):
+#     return render_template("edit_post.html")
 
 
 @app.route("/api/posts/<int:user_id>", methods=["POST"])
