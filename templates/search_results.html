@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Search Results</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<main class="page">
+    <div class="shell">
+        <section class="hero">
+            <div>
+                <span class="pill">Search</span>
+                <h1>Filtered users</h1>
+                <p>Results are static for now. Later you can render users based on the query.</p>
+                <form class="search-bar" action="/search" method="get">
+                    <input type="text" name="q" placeholder="Search again">
+                    <button type="submit">Search</button>
+                </form>
+                <div class="nav">
+                    <a href="/">Landing</a>
+                    <a href="/users">Browse Users</a>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Query</h3>
+                <p>Showing matches for: "creative"</p>
+                <div class="stats">
+                    <div class="stat">
+                        <span>3</span>
+                        Matches
+                    </div>
+                    <div class="stat">
+                        <span>24</span>
+                        Total users
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-title">
+            <h2>Results</h2>
+            <span class="tag">Static preview</span>
+        </div>
+        <section class="card-grid">
+            <article class="card">
+                <h3>Mara L.</h3>
+                <p>Creative director · mixing analog film and digital collages.</p>
+            </article>
+            <article class="card">
+                <h3>Levan D.</h3>
+                <p>Writer · curates zines and workshop notes.</p>
+            </article>
+            <article class="card">
+                <h3>Nino G.</h3>
+                <p>Producer · keeps a visual journal of soundscapes.</p>
+            </article>
+        </section>
+    </div>
+</main>
+</body>
+</html>

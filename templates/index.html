@@ -3,91 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home Page</title>
-
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            padding: 40px;
-        }
-
-        .container {
-            width: 500px;
-            margin: auto;
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
-        }
-
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            text-align: left;
-        }
-
-        th {
-            background-color: #f2f2f2;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-
-        .logout-btn {
-            display: block;
-            width: 120px;
-            margin: 25px auto 0;
-            text-align: center;
-            padding: 10px;
-            background-color: #e74c3c;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-        }
-
-        .logout-btn:hover {
-            background-color: #c0392b;
-        }
-    </style>
+    <title>Landing</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
+<main class="page">
+    <div class="shell">
+        <section class="hero">
+            <div>
+                <span class="pill">Community / Landing</span>
+                <h1>Meet the voices shaping the studio journal.</h1>
+                <p>Explore profiles, scan fresh posts, and jump into a focused writing flow. Everything here is static for now, but laid out to become dynamic later.</p>
+                <form class="search-bar" action="/search" method="get">
+                    <input type="text" name="q" placeholder="Search people by name">
+                    <button type="submit">Find</button>
+                </form>
+                <nav class="nav">
+                    <a href="/profile">Profile</a>
+                    <a href="/my-posts">My Posts</a>
+                    <a href="/create-post">Create Post</a>
+                    <a href="/users">Browse Users</a>
+                </nav>
+            </div>
+            <div>
+                <div class="card">
+                    <h3>Spotlight</h3>
+                    <p>“Every post is a postcard to future me.”</p>
+                    <div class="stats">
+                        <div class="stat">
+                            <span>128</span>
+                            Active writers
+                        </div>
+                        <div class="stat">
+                            <span>42</span>
+                            New stories
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-<div class="container">
+        <div class="section-title">
+            <h2>Latest voices</h2>
+            <span class="tag">Static preview</span>
+        </div>
+        <section class="card-grid">
+            <article class="card">
+                <h3>Amelia R.</h3>
+                <p>Illustrator · loves minimal palettes and tiny haiku.</p>
+            </article>
+            <article class="card">
+                <h3>Jonas K.</h3>
+                <p>Product tinkerer · building tools for slow mornings.</p>
+            </article>
+            <article class="card">
+                <h3>Mei L.</h3>
+                <p>Writer · experiments with travel notes and sketches.</p>
+            </article>
+            <article class="card">
+                <h3>Ravi P.</h3>
+                <p>Photographer · collecting city textures and calm.</p>
+            </article>
+        </section>
 
-    <h1>Home Page</h1>
-
-    <table>
-        <tr>
-            <th>First Name</th>
-            <td>{{ session.first_name }}</td>
-        </tr>
-
-        <tr>
-            <th>Last Name</th>
-            <td>{{ session.last_name }}</td>
-        </tr>
-    </table>
-
-    {% if session.user_id %}
-    <a href="{{ url_for('logout') }}" class="logout-btn">
-        Logout
-    </a>
-    {% endif %}
-
-</div>
-
+        <p class="footer">Static templates only. Wire routes and data later.</p>
+    </div>
+</main>
 </body>
 </html>
