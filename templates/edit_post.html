@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Post</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<main class="page">
+    <div class="shell">
+        <section class="hero">
+            <div>
+                <span class="pill">Edit</span>
+                <h1>Refine your draft.</h1>
+                <p>Static edit form for a single post. Replace with dynamic values later.</p>
+                <div class="nav">
+                    <a href="/">Landing</a>
+                    <a href="/my-posts">My Posts</a>
+                    <a href="/post/1">View Post</a>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Editing tips</h3>
+                <p>Keep the title short, highlight the key story, and trim extra lines.</p>
+                <div class="stats">
+                    <div class="stat">
+                        <span>2</span>
+                        Drafts saved
+                    </div>
+                    <div class="stat">
+                        <span>7</span>
+                        Revisions
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-title">
+            <h2>Edit post</h2>
+            <span class="tag">Static form</span>
+        </div>
+        <section class="card">
+            <form class="form" action="/post/1" method="post">
+                <div>
+                    <label>Title</label>
+                    <input type="text" value="Notes from the morning ferry" required>
+                </div>
+                <div>
+                    <label>Category</label>
+                    <select>
+                        <option selected>Daily notes</option>
+                        <option>Process log</option>
+                        <option>Studio update</option>
+                        <option>Field journal</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Description</label>
+                    <textarea>Short reflections on light, waves, and commuter rituals.</textarea>
+                </div>
+                <div class="nav">
+                    <button class="button" type="submit">Save changes</button>
+                    <button class="button secondary" type="button">Cancel</button>
+                </div>
+            </form>
+        </section>
+    </div>
+</main>
+</body>
+</html>
