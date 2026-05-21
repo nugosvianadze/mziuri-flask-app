@@ -4,124 +4,44 @@
     <meta charset="UTF-8">
     <title>Login</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <style>
-        * {
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
-
-        body {
-            margin: 0;
-            height: 100vh;
-            background: linear-gradient(135deg, #4facfe, #00f2fe);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .login-container {
-            background: white;
-            padding: 40px;
-            border-radius: 12px;
-            width: 320px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            text-align: center;
-        }
-
-        .login-container h2 {
-            margin-bottom: 20px;
-        }
-
-        .input-group {
-            margin-bottom: 15px;
-            text-align: left;
-        }
-
-        .input-group label {
-            font-size: 14px;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 10px;
-            margin-top: 5px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            outline: none;
-            transition: 0.3s;
-        }
-
-        .input-group input:focus {
-            border-color: #4facfe;
-        }
-
-        .login-btn {
-            width: 100%;
-            padding: 10px;
-            background: #4facfe;
-            border: none;
-            color: white;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: 0.3s;
-        }
-
-        .login-btn:hover {
-            background: #3a8be0;
-        }
-
-        .footer {
-            margin-top: 15px;
-            font-size: 13px;
-        }
-
-        .footer a {
-            color: #4facfe;
-            text-decoration: none;
-        }
-
-        .footer a:hover {
-            text-decoration: underline;
-        }
-
-        .error {
-            color: red;
-            font-size: 13px;
-            margin-bottom: 10px;
-        }
-    </style>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-
-<div class="login-container">
-    <h2>Login</h2>
-
-    <div id="error" class="error"></div>
-
-    <form action="{{ url_for('login') }}" method="post">
-        <div class="input-group">
-            <label>Email</label>
-            <input type="email" id="email" required name="email">
-        </div>
-
-        <div class="input-group">
-            <label>Password</label>
-            <input type="password" id="password" required name="password" maxlength="20" minlength="6">
-        </div>
-
-        <button class="login-btn" type="submit">Login</button>
-    </form>
-
-    <div class="footer">
-        Don’t have an account? <a href="#">Sign up</a>
+<main class="page">
+    <div class="shell">
+        <section class="hero">
+            <div>
+                <span class="pill">Welcome back</span>
+                <h1>Log in to your writing room.</h1>
+                <p>Static preview only. Hook the form to your auth flow later.</p>
+                <form class="form" action="/login" method="post">
+                    <div>
+                        <label>Email address</label>
+                        <input type="email" name="email" placeholder="hello@studio.app" required>
+                    </div>
+                    <div>
+                        <label>Password</label>
+                        <input type="password" name="password" placeholder="••••••••" minlength="6" required>
+                    </div>
+                    <button class="button" type="submit">Login</button>
+                </form>
+            </div>
+            <div class="card">
+                <h3>Quick tips</h3>
+                <p>Keep your sessions short and focused. This space is designed for deep work.</p>
+                <div class="stats">
+                    <div class="stat">
+                        <span>8 min</span>
+                        Average entry
+                    </div>
+                    <div class="stat">
+                        <span>3 days</span>
+                        Weekly streak
+                    </div>
+                </div>
+            </div>
+        </section>
     </div>
-    {% if errors %}
-
-      <span style="color: red">{{ errors | join('<br><br>')| safe}}</span>
-    {% endif %}
-</div>
-
+</main>
 </body>
 </html>

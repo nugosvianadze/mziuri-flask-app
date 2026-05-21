@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<main class="page">
+    <div class="shell">
+        <section class="hero">
+            <div>
+                <span class="pill">Join</span>
+                <h1>Create your studio account.</h1>
+                <p>Static registration form for future user signups.</p>
+                <div class="nav">
+                    <a href="/">Landing</a>
+                    <a href="/login">Login</a>
+                    <a href="/profile">Profile</a>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Account basics</h3>
+                <p>Use a real email and a strong password.</p>
+                <div class="stats">
+                    <div class="stat">
+                        <span>5 min</span>
+                        Setup time
+                    </div>
+                    <div class="stat">
+                        <span>100%</span>
+                        Free
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-title">
+            <h2>Register</h2>
+            <span class="tag">Static form</span>
+        </div>
+        <section class="card">
+            <form class="form" action="/register" method="post">
+                <div>
+                    <label>First name</label>
+                    <input type="text" placeholder="Amelia" required>
+                </div>
+                <div>
+                    <label>Last name</label>
+                    <input type="text" placeholder="Rivera" required>
+                </div>
+                <div>
+                    <label>Email</label>
+                    <input type="email" placeholder="amelia@studio.app" required>
+                </div>
+                <div>
+                    <label>Password</label>
+                    <input type="password" placeholder="••••••••" minlength="6" required>
+                </div>
+                <div>
+                    <label>Age</label>
+                    <input type="number" placeholder="23" min="1" max="120">
+                </div>
+                <button class="button" type="submit">Create account</button>
+            </form>
+        </section>
+        </div>
+    </main>
+    </body>
+    </html>
