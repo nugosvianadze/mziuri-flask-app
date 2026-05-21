@@ -1,9 +1,7 @@
-import sqlite3
 
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.exceptions import NotFound
 
-from config import DB_PATH
 
 class UserService:
 
@@ -15,7 +13,7 @@ class UserService:
 
 
     def get_users_with_word(self, name: str, db: SQLAlchemy):
-        from main import User
+        from main.models import User
 
         data = {}
         if name is not None:

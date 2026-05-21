@@ -2,9 +2,6 @@
 .venv
 venv
 *.env
-*.sqlite
-*.dbsqlite3
-*.db
 sqlite
 *.xml
 
