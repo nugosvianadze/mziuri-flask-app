@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask
 from flask_cors import CORS
 
@@ -52,7 +54,12 @@ from main.routes import *
 #     return render_template("edit_post.html")
 
 def create_app() -> Flask:
-    app = Flask(__name__)
+    app = Flask(
+        __name__,
+        template_folder=os.path.join(os.path.dirname(__file__), "..", "templates"),
+        static_folder=os.path.join(os.path.dirname(__file__), "..", "static"),
+    )
+    os.makedirs(app.instance_path, exist_ok=True)
     app.config.from_object('config.Config')
 
     db.init_app(app)
