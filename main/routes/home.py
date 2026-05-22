@@ -4,13 +4,13 @@ from main.models.user import User
 from extensions import db
 from services.user_service import UserService
 
-main_bp = Blueprint("home", __name__, url_prefix="/api/user_data")
+main_bp = Blueprint("home", __name__, url_prefix="/")
 user_service = UserService()
 
 @main_bp.route("/home", methods=["GET"])
 @main_bp.route("/")
 def home():
     if not session.get("user_id"):
-        return redirect(url_for("login"))
+        return redirect(url_for("users.login"))
     users = db.session.scalars(db.select(User).limit(10)).all()
     return render_template("index.html", users=users)

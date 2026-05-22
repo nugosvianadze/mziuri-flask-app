@@ -69,5 +69,5 @@ def get_user_posts(user_id: int) -> tuple[dict, int]:
     except Exception as e:
         return {
             "success": False,
-            "message": e.description
+            "message": e.message
         }, 500

@@ -8,7 +8,6 @@ from utils.validators import validate_password, validate_email
 user_bp = Blueprint("users", __name__, url_prefix="/api/user_data")
 user_service = UserService()
 
-
 @user_bp.route("/", methods=["GET"])
 def user_data():
     name = request.args.get("name")
@@ -31,7 +30,7 @@ def get_user(user_id: int):
     except Exception as e:
         return {
             "success": False,
-            "message": e
+            "message": e.description
         }
 
 
@@ -100,7 +99,7 @@ def login():
     session["user_id"] = user.id
     session["first_name"] = user.first_name
     session["last_name"] = user.last_name
-    return redirect(url_for("home"))
+    return redirect(url_for("home.home"))
 
 
 @user_bp.route("/logout")
@@ -108,7 +107,7 @@ def logout():
     session.pop("user_id", None)
     session.pop("first_name", None)
     session.pop("last_name", None)
-    return redirect(url_for("login"))
+    return redirect(url_for("users.login"))
 
 
 @user_bp.route("/api/user_data/<int:user_id>", methods=["DELETE"])
