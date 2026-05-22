@@ -37,7 +37,7 @@ class UserService:
         except Exception as e:
             return {
                 "success": False,
-                "message": e
+                "message": str(e)
             }
 
     @staticmethod
@@ -108,7 +108,7 @@ class UserService:
             db.session.rollback()
             return {
                 "success": False,
-                "message": e
+                "message": str(e)
             }, 500
 
     @staticmethod
@@ -143,5 +143,5 @@ class UserService:
             db.session.rollback()
             return {
                 "success": False,
-                "message": e
+                "message": str(e)
             }, 500
