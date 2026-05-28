@@ -33,7 +33,6 @@ class User(db.Model):
             "age": self.age,
             "id": self.id,
             "email": self.email,
-            "password": self.password
         }
 
     def to_dict_with_posts(self):

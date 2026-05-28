@@ -113,7 +113,7 @@ class UserService:
 
     @staticmethod
     def create_user(db, user_cls, first_name: str,
-                    last_name: str, age: int) -> tuple[dict, int]:
+                    last_name: str, age: int, email: str, password: str) -> tuple[dict, int]:
         if not age:
             return {
                 "success": False,
@@ -130,7 +130,9 @@ class UserService:
             user = user_cls(
             first_name=first_name,
             last_name=last_name,
-            age=age
+            age=age,
+            email=email,
+            password=password
             )
             db.session.add(user)
             db.session.commit()

@@ -297,3 +297,21 @@ img {
 		margin: 0 auto;
 	}
 }
+
+.logout-form {
+    display: inline;
+}
+
+.logout-form button {
+    border: none;
+    background: #111;
+    color: white;
+    padding: 0.7rem 1rem;
+    border-radius: 999px;
+    cursor: pointer;
+    font: inherit;
+}
+
+.logout-form button:hover {
+    opacity: 0.9;
+}

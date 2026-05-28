@@ -23,6 +23,10 @@
                     <a href="/my-posts">My Posts</a>
                     <a href="/create-post">Create Post</a>
                     <a href="/users">Browse Users</a>
+
+                    <form action="{{ url_for('users.logout') }}" method="post" class="logout-form">
+                        <button type="submit">Logout</button>
+                    </form>
                 </nav>
             </div>
             <div>
@@ -31,7 +35,7 @@
                     <p>“Every post is a postcard to future me.”</p>
                     <div class="stats">
                         <div class="stat">
-                            <span>128</span>
+                            <span>{{ users | length }}</span>
                             Active writers
                         </div>
                         <div class="stat">

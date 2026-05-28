@@ -41,28 +41,33 @@
             <span class="tag">Static form</span>
         </div>
         <section class="card">
-            <form class="form" action="/register" method="post">
+            <form class="form" action="{{ url_for('users.signup') }}" method="post">
                 <div>
                     <label>First name</label>
-                    <input type="text" placeholder="Amelia" required>
+                    <input type="text" placeholder="Amelia" name="first_name">
                 </div>
                 <div>
                     <label>Last name</label>
-                    <input type="text" placeholder="Rivera" required>
+                    <input type="text" placeholder="Rivera" name="last_name">
                 </div>
                 <div>
                     <label>Email</label>
-                    <input type="email" placeholder="amelia@studio.app" required>
+                    <input type="email" placeholder="amelia@studio.app" required name="email">
                 </div>
                 <div>
                     <label>Password</label>
-                    <input type="password" placeholder="••••••••" minlength="6" required>
+                    <input type="password" placeholder="••••••••" minlength="6" required name="password">
                 </div>
                 <div>
                     <label>Age</label>
-                    <input type="number" placeholder="23" min="1" max="120">
+                    <input type="number" placeholder="23" min="1" max="200" name="age">
                 </div>
                 <button class="button" type="submit">Create account</button>
+                {% if errors %}
+                    {% for error in errors %}
+                        <span style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                {% endif %}
             </form>
         </section>
         </div>

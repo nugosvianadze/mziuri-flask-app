@@ -14,7 +14,7 @@
                 <span class="pill">Welcome back</span>
                 <h1>Log in to your writing room.</h1>
                 <p>Static preview only. Hook the form to your auth flow later.</p>
-                <form class="form" action="/login" method="post">
+                <form class="form" action="{{ url_for('users.login') }}" method="post">
                     <div>
                         <label>Email address</label>
                         <input type="email" name="email" placeholder="hello@studio.app" required>
@@ -24,6 +24,9 @@
                         <input type="password" name="password" placeholder="••••••••" minlength="6" required>
                     </div>
                     <button class="button" type="submit">Login</button>
+                    {% if error %}
+                        <span style="color: red;">{{ error }}</span>
+                    {% endif %}
                 </form>
             </div>
             <div class="card">

@@ -1,4 +1,6 @@
-from sqlalchemy import Table, Column, ForeignKey, String
+from datetime import datetime
+
+from sqlalchemy import Table, Column, ForeignKey, String, DateTime, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from extensions import Base, db
@@ -17,7 +19,20 @@ class Posts(db.Model):
     # views_count: int default 0
     # likes_count: int default 0
     # published_at: datetime
-    # created_at / updated_at: timestamps
+    published_at: Mapped[datetime | None]
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now()
+    )
+
+    # Updates automatically every time the record is changed
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        onupdate=func.now(),
+        server_default=func.now()
+    )
+
 
     user: Mapped["User"] = relationship(back_populates="posts")
 

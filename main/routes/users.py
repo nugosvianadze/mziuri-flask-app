@@ -1,12 +1,15 @@
 from flask import Blueprint, render_template, redirect, url_for, request, session
+from werkzeug.security import check_password_hash
 
 from main.models.user import User
 from extensions import db
 from services.user_service import UserService
+from services.auth_service import AuthService
 from utils.validators import validate_password, validate_email
 
 user_bp = Blueprint("users", __name__, url_prefix="/api/user_data")
 user_service = UserService()
+auth_service = AuthService()
 
 @user_bp.route("/", methods=["GET"])
 def user_data():
@@ -74,39 +77,68 @@ def login():
     if request.method == "GET":
         return render_template("login.html")
     email, password = request.form.get('email'), request.form.get('password')
-
-    password_validate = validate_password(password)
+    print(email, password)
+    # password_validate = validate_password(password)
     email_validate = validate_email(email)
 
-    if not password_validate["success"] and password_validate["errors"]:
-        return render_template("login.html", errors=password_validate["errors"])
+    # if not password_validate["success"] and password_validate["errors"]:
+    #     return render_template("login.html", error=password_validate["errors"])
 
     if not email_validate["success"] and email_validate["errors"]:
-        return render_template("login.html", errors=email_validate["errors"])
+        return render_template("login.html", error=email_validate["errors"])
 
-    users = db.session.execute(db.select(User).limit(10)).scalars().all()
-    users_dict = [user.to_dict() for user in users]
-    print(users_dict)
     print(email, password)
-    query = db.session.query(User).filter(User.email == email.strip(),
-                                          User.password == password.strip())
+    query = db.session.query(User).filter(User.email == email.strip())
     execute = db.session.execute(query)
     user = execute.scalar()
-    print(user)
     if not user:
+        print(1)
         return render_template("login.html",
                                error="Incorrect Credentials, Try again!")
+
+    print(user.password)
+    print(password)
+    is_valid_password = check_password_hash(user.password, password)
+    if not is_valid_password:
+        print(2)
+        return render_template("login.html",
+                               error="Incorrect Credentials, Try again!")
+
     session["user_id"] = user.id
     session["first_name"] = user.first_name
     session["last_name"] = user.last_name
     return redirect(url_for("home.home"))
 
+@user_bp.route("/signup", methods=["GET", "POST"])
+def signup():
+    if request.method == "GET":
+        return render_template("register.html")
 
-@user_bp.route("/logout")
+    first_name, last_name, password, email, age = (request.form.get("first_name"),
+                                                   request.form.get("last_name"),
+                                                   request.form.get("password"),
+                                                   request.form.get("email"),
+                                                   request.form.get("age"))
+    data: dict = auth_service.validate_signup_form(
+        first_name, last_name, password, email, age
+    )
+    if data.get("errors"):
+        return render_template("register.html", errors=data["errors"])
+
+    data, status_code = user_service.create_user(db, User, first_name, last_name,
+                                                 age, email, data["hashed_password"]["hash_password"])
+    if not data.get("success"):
+        return render_template("register.html", errors=[data.get('message')])
+
+    session["user_id"] = data["data"]["id"]
+    session["email"] = data["data"]["email"]
+    return redirect(url_for("home.home"))
+
+
+@user_bp.route("/logout", methods=["POST"])
 def logout():
     session.pop("user_id", None)
-    session.pop("first_name", None)
-    session.pop("last_name", None)
+    session.pop("email", None)
     return redirect(url_for("users.login"))
 
 
@@ -148,3 +180,4 @@ def delete_user(user_id: int) -> tuple[dict, int]:
 #         "message": "user id param is not valid, try again!",
 #         "data": None
 #     }
+
