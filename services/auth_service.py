@@ -1,6 +1,6 @@
 from typing import Optional, Any
 
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import generate_password_hash
 
 
 class AuthService:

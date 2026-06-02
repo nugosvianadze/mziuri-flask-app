@@ -20,8 +20,8 @@
                 </form>
                 <nav class="nav">
                     <a href="/profile">Profile</a>
-                    <a href="/my-posts">My Posts</a>
-                    <a href="/create-post">Create Post</a>
+                    <a href="{{ url_for('posts.my_posts') }}">My Posts</a>
+                    <a href="{{ url_for('posts.create_template_post') }}">Create Post</a>
                     <a href="/users">Browse Users</a>
 
                     <form action="{{ url_for('users.logout') }}" method="post" class="logout-form">
@@ -39,7 +39,7 @@
                             Active writers
                         </div>
                         <div class="stat">
-                            <span>42</span>
+                            <span>{{ latest_posts }}</span>
                             New stories
                         </div>
                     </div>

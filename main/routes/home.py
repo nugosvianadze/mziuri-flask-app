@@ -1,5 +1,9 @@
-from flask import Blueprint, render_template, redirect, url_for, session
+from datetime import datetime, timezone, timedelta
 
+from flask import Blueprint, render_template, redirect, url_for, session
+from sqlalchemy import func
+
+from main.models import Posts
 from main.models.user import User
 from extensions import db
 from services.user_service import UserService
@@ -10,7 +14,14 @@ user_service = UserService()
 @main_bp.route("/home", methods=["GET"])
 @main_bp.route("/")
 def home():
+    now = datetime.now(tz=timezone.utc)
+    one_hour_ago = now - timedelta(hours=1)
+    print(one_hour_ago)
     if not session.get("user_id"):
         return redirect(url_for("users.login"))
     users = db.session.scalars(db.select(User).limit(10)).all()
-    return render_template("index.html", users=users)
+    latest_posts = db.session.scalar(db.select(func.count(Posts.id)).
+                              where(Posts.created_at >= one_hour_ago))
+    print(latest_posts)
+    return render_template("index.html", users=users,
+                           latest_posts=latest_posts)

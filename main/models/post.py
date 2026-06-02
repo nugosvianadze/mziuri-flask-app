@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Table, Column, ForeignKey, String, DateTime, func
+from sqlalchemy import Table, Column, ForeignKey, String, DateTime, func, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from extensions import Base, db
@@ -14,11 +14,11 @@ class Posts(db.Model):
         ForeignKey("user.id", ondelete="CASCADE")
     )
     # Suggested fields for full implementation:
-    # body: long text content
-    # status: str (draft, published)
-    # views_count: int default 0
+    status: Mapped[str] = mapped_column(String(10), default="draft",
+                                        server_default="draft")
+    views_count: Mapped[int] = mapped_column(default=0, server_default='0')
+    category: Mapped[str | None]
     # likes_count: int default 0
-    # published_at: datetime
     published_at: Mapped[datetime | None]
 
     created_at: Mapped[datetime] = mapped_column(
