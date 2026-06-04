@@ -16,8 +16,8 @@
                 <p>Static template for a single post view with a place to show views.</p>
                 <div class="nav">
                     <a href="/">Landing</a>
-                    <a href="/my-posts">My Posts</a>
-                    <a href="/create-post">Create Post</a>
+                    <a href="{{ url_for('posts.my_posts') }}">My Posts</a>
+                    <a href="{{ url_for('posts.create_template_post') }}">Create Post</a>
                 </div>
             </div>
             <div class="card">
@@ -25,11 +25,11 @@
                 <p>Use these fields later for dynamic counters.</p>
                 <div class="stats">
                     <div class="stat">
-                        <span>1,248</span>
+                        <span>{{ post.views_count }} </span>
                         Views
                     </div>
                     <div class="stat">
-                        <span>23</span>
+                        <span>TEST</span>
                         Saves
                     </div>
                 </div>
@@ -38,11 +38,9 @@
 
         <div class="section-title">
             <h2>Reading</h2>
-            <span class="tag">Static content</span>
         </div>
         <section class="card">
-            <p>The ferry left the dock at 6:40, the sky still soft with pink haze. I sketched the outlines of the skyline and wrote down three small promises for the day: keep the camera close, ask better questions, and let the pace stay slow.</p>
-            <p>By the time the city came into focus, I had a list of images to chase. The rest of the entry became a map of quiet observations: the sound of chains, the warm light on the deck, and the slow roll of the water.</p>
+            {{ post.description }}
         </section>
     </div>
 </main>

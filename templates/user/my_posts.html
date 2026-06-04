@@ -17,7 +17,7 @@
                 <div class="nav">
                     <a href="/">Landing</a>
                     <a href="/profile">Profile</a>
-                    <a href="/create-post">Create Post</a>
+                    <a href="{{ url_for('posts.create_template_post') }}">Create Post</a>
                 </div>
             </div>
             <div class="card">
@@ -46,7 +46,7 @@
                 <h3>{{ post.title }}</h3>
                 <p> {{ post.description }} </p>
                 <div class="nav">
-                    <a href="/post/1">View</a>
+                    <a href="{{ url_for('posts.post_detail_page', post_id=post.id) }}">View</a>
                     <a href="/post/1/edit">Edit</a>
                     {% if post.status == "draft" %}
                     <form action="/post/1" method="post">

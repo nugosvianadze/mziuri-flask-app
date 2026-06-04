@@ -23,5 +23,5 @@ def home():
     latest_posts = db.session.scalar(db.select(func.count(Posts.id)).
                               where(Posts.created_at >= one_hour_ago))
     print(latest_posts)
-    return render_template("index.html", users=users,
+    return render_template("main/index.html", users=users,
                            latest_posts=latest_posts)
