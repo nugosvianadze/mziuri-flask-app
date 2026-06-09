@@ -47,29 +47,29 @@
             </div>
         </section>
 
-        <div class="section-title">
-            <h2>Latest voices</h2>
-            <span class="tag">Static preview</span>
-        </div>
-        <section class="card-grid">
-            <article class="card">
-                <h3>Amelia R.</h3>
-                <p>Illustrator · loves minimal palettes and tiny haiku.</p>
-            </article>
-            <article class="card">
-                <h3>Jonas K.</h3>
-                <p>Product tinkerer · building tools for slow mornings.</p>
-            </article>
-            <article class="card">
-                <h3>Mei L.</h3>
-                <p>Writer · experiments with travel notes and sketches.</p>
-            </article>
-            <article class="card">
-                <h3>Ravi P.</h3>
-                <p>Photographer · collecting city textures and calm.</p>
-            </article>
-        </section>
 
+        {% if last_four_posts %}
+            <div class="section-title">
+                <h2>Latest Posts</h2>
+            </div>
+
+            <!-- Open the grid container ONCE before the loop starts -->
+            <section class="card-grid">
+                {% for post in last_four_posts %}
+                    <article class="card">
+                        <a href="{{ url_for('posts.post_detail_page', post_id=post.id) }}" class="card-link">
+                            <h3>{{ post.user.username }}</h3>
+                            <p>{{ post.title }}</p>
+                        </a>
+                    </article>
+                {% endfor %}
+            </section> <!-- Close the grid container ONCE after the loop ends -->
+
+        {% else %}
+            <div class="section-title">
+                <h2>No Latest Posts</h2>
+            </div>
+        {% endif %}
         <p class="footer">Static templates only. Wire routes and data later.</p>
     </div>
 </main>

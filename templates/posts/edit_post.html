@@ -41,28 +41,37 @@
             <span class="tag">Static form</span>
         </div>
         <section class="card">
-            <form class="form" action="/post/1" method="post">
+            <form class="form" action="{{ url_for('posts.update', post_id=post.id) }}" method="post">
                 <div>
                     <label>Title</label>
-                    <input type="text" value="Notes from the morning ferry" required>
+                    <input type="text" value="{{ post.title }}" name="title" required>
                 </div>
                 <div>
                     <label>Category</label>
-                    <select>
-                        <option selected>Daily notes</option>
-                        <option>Process log</option>
-                        <option>Studio update</option>
-                        <option>Field journal</option>
+                    <select name="category">
+                        {% for cat in cat_options %}
+                        <option value="{{ cat }}"   {% if cat == post.category %}selected{% endif %} >{{ cat }}  </option>
+                        {% endfor %}
                     </select>
                 </div>
                 <div>
                     <label>Description</label>
-                    <textarea>Short reflections on light, waves, and commuter rituals.</textarea>
+                    <textarea name="description">{{ post.description }}</textarea>
                 </div>
                 <div class="nav">
                     <button class="button" type="submit">Save changes</button>
                     <button class="button secondary" type="button">Cancel</button>
                 </div>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
             </form>
         </section>
     </div>

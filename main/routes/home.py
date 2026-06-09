@@ -20,8 +20,12 @@ def home():
     if not session.get("user_id"):
         return redirect(url_for("users.login"))
     users = db.session.scalars(db.select(User).limit(10)).all()
-    latest_posts = db.session.scalar(db.select(func.count(Posts.id)).
+    latest_posts_count = db.session.scalar(db.select(func.count(Posts.id)).
                               where(Posts.created_at >= one_hour_ago))
-    print(latest_posts)
+    last_four_posts = db.session.execute(db.select(Posts).
+                                         where(Posts.status == "published").
+                                         order_by(Posts.created_at.desc()).limit(4)).scalars()
+
     return render_template("main/index.html", users=users,
-                           latest_posts=latest_posts)
+                           latest_posts=latest_posts_count,
+                           last_four_posts=last_four_posts)

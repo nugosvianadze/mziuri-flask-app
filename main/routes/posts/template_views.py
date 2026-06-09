@@ -1,6 +1,6 @@
 import time
 
-from flask import session, redirect, url_for, request, render_template
+from flask import session, redirect, url_for, request, render_template, flash
 from sqlalchemy import func
 from werkzeug.exceptions import NotFound
 
@@ -8,6 +8,9 @@ from extensions import db
 from main import posts_bp
 from main.models import User, Posts
 from main.utils.decorators import login_required
+
+
+CATEGORY_OPTIONS = ["Daily notes", "Process log", "Studio update", "Field journal"]
 
 
 @posts_bp.route("/template", methods=["POST", "GET"])
@@ -81,3 +84,49 @@ def post_detail_page(post_id: int):
     db.session.commit()
     return render_template("posts/post_detail.html", post=post)
 
+
+@posts_bp.route("/update/<int:post_id>", methods=["GET", "POST"])
+@login_required
+def update(post_id: int):
+    post = db.session.get(Posts, post_id)
+    if not post:
+        return redirect(url_for("posts.my_posts"))
+
+    if request.method == "GET":
+        return render_template("posts/edit_post.html", post=post, cat_options=CATEGORY_OPTIONS)
+
+    title, category, description = (request.form.get("title"),
+                                    request.form.get("category"),
+                                    request.form.get("description"))
+    print(f"category - {category}")
+    if not title:
+        flash('Invalid title value. Please try again.', 'danger')
+        return render_template("posts/edit_post.html", post=post)
+
+
+    post.title = title
+    post.category = category
+    post.description = description
+    db.session.commit()
+    return redirect(url_for("posts.post_detail_page", post_id=post_id))
+
+
+@posts_bp.route("/status_update/<int:post_id>", methods=["POST"])
+@login_required
+def status_update(post_id: int):
+    post = db.session.get(Posts, post_id)
+    if not post:
+        return redirect(url_for("posts.my_posts"))
+
+    if request.method == "GET":
+        return render_template("posts/edit_post.html", post=post, cat_options=CATEGORY_OPTIONS)
+
+    status = request.form.get("status")
+    print(f"status - {status}")
+    if not status:
+        flash('Invalid status value. Please try again.', 'danger')
+        return render_template("posts/edit_post.html", post=post)
+
+    post.status = status
+    db.session.commit()
+    return redirect(url_for("posts.my_posts", post_id=post_id))

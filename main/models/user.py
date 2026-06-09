@@ -26,6 +26,10 @@ class User(db.Model):
         uselist=False
     )
 
+    @property
+    def username(self) -> str:
+        return f"{self.first_name} {self.last_name}"
+
     def to_dict(self):
         return {
             "first_name": self.first_name,

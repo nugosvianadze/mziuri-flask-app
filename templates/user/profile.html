@@ -18,6 +18,9 @@
                     <a href="/">Landing</a>
                     <a href="/my-posts">My Posts</a>
                     <a href="/create-post">Create Post</a>
+                    <form action="{{ url_for('users.logout') }}" method="post" class="logout-form">
+                        <button type="submit">Logout</button>
+                    </form>
                 </div>
             </div>
             <div class="card">

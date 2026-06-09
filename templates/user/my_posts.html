@@ -18,6 +18,9 @@
                     <a href="/">Landing</a>
                     <a href="/profile">Profile</a>
                     <a href="{{ url_for('posts.create_template_post') }}">Create Post</a>
+                    <form action="{{ url_for('users.logout') }}" method="post" class="logout-form">
+                        <button type="submit">Logout</button>
+                    </form>
                 </div>
             </div>
             <div class="card">
@@ -47,14 +50,16 @@
                 <p> {{ post.description }} </p>
                 <div class="nav">
                     <a href="{{ url_for('posts.post_detail_page', post_id=post.id) }}">View</a>
-                    <a href="/post/1/edit">Edit</a>
+                    <a href="{{ url_for('posts.update', post_id=post.id) }}">Edit</a>
                     {% if post.status == "draft" %}
-                    <form action="/post/1" method="post">
+                    <form action="{{ url_for('posts.status_update', post_id=post.id) }}" method="post">
                         <button class="button" type="submit">Publish</button>
+                            <input type="hidden" name="status" value="published">
                     </form>
                     {% else %}
-                    <form action="/post/2/draft" method="post">
+                    <form action="{{ url_for('posts.status_update', post_id=post.id) }}" method="post">
                         <button class="button secondary" type="submit">Mark as Draft</button>
+                        <input type="hidden" name="status" value="draft">
                     </form>
                     {% endif %}
                 </div>
