@@ -14,15 +14,15 @@
                 <span class="pill">Community / Landing</span>
                 <h1>Meet the voices shaping the studio journal.</h1>
                 <p>Explore profiles, scan fresh posts, and jump into a focused writing flow. Everything here is static for now, but laid out to become dynamic later.</p>
-                <form class="search-bar" action="/search" method="get">
+                <form class="search-bar" action="{{ url_for('users.user_list') }}" method="get">
                     <input type="text" name="q" placeholder="Search people by name">
                     <button type="submit">Find</button>
                 </form>
                 <nav class="nav">
-                    <a href="/profile">Profile</a>
+                    <a href="{{ url_for('users.profile') }}">Profile</a>
                     <a href="{{ url_for('posts.my_posts') }}">My Posts</a>
                     <a href="{{ url_for('posts.create_template_post') }}">Create Post</a>
-                    <a href="/users">Browse Users</a>
+                    <a href="{{ url_for('users.user_list') }}">Browse Users</a>
 
                     <form action="{{ url_for('users.logout') }}" method="post" class="logout-form">
                         <button type="submit">Logout</button>

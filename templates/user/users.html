@@ -44,22 +44,11 @@
             <span class="tag">Static cards</span>
         </div>
         <section class="card-grid">
+            {% for user in users %}
             <article class="card">
-                <h3>Lina Verne</h3>
-                <p>Visual designer · Map-driven storytelling.</p>
+                <h3>{{ user.username }}</h3>
             </article>
-            <article class="card">
-                <h3>Chris O.</h3>
-                <p>Editor · Crafting sharp intros and conclusions.</p>
-            </article>
-            <article class="card">
-                <h3>Samir D.</h3>
-                <p>Writer · Daily notes from the lab.</p>
-            </article>
-            <article class="card">
-                <h3>Ari G.</h3>
-                <p>Photographer · Color, texture, and quiet streets.</p>
-            </article>
+            {% endfor %}
         </section>
     </div>
 </main>

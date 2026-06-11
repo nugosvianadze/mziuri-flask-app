@@ -12,12 +12,12 @@
         <section class="hero">
             <div>
                 <span class="pill">Profile</span>
-                <h1>Amelia Rivera</h1>
+                <h1>{{ user.username }}</h1>
                 <p>Illustrator and storyteller exploring quiet moments in the city. Static template ready for dynamic data.</p>
                 <div class="nav">
                     <a href="/">Landing</a>
-                    <a href="/my-posts">My Posts</a>
-                    <a href="/create-post">Create Post</a>
+                    <a href="{{ url_for('posts.my_posts') }}">My Posts</a>
+                    <a href="{{ url_for('posts.create_template_post') }}">Create Post</a>
                     <form action="{{ url_for('users.logout') }}" method="post" class="logout-form">
                         <button type="submit">Logout</button>
                     </form>
@@ -33,16 +33,12 @@
                 </div>
                 <div class="stats">
                     <div class="stat">
-                        <span>27</span>
+                        <span>{{ user.posts | length }}</span>
                         Posts
                     </div>
                     <div class="stat">
-                        <span>4.8k</span>
+                        <span>{{ total_views }}</span>
                         Reads
-                    </div>
-                    <div class="stat">
-                        <span>12</span>
-                        Collections
                     </div>
                 </div>
             </div>

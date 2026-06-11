@@ -1,11 +1,13 @@
 import time
 
 from flask import render_template, redirect, url_for, request, session
+from sqlalchemy import func, or_
 from werkzeug.security import check_password_hash
 
 from extensions import db
-from main import user_bp
+from main import user_bp, login_required, get_user, Posts
 from main.models.user import User
+
 from services.auth_service import AuthService
 from services.user_service import UserService
 from utils.validators import validate_email
@@ -76,6 +78,33 @@ def signup():
     session["user_id"] = data["data"]["id"]
     session["email"] = data["data"]["email"]
     return redirect(url_for("home.home"))
+
+@user_bp.route("/profile", methods=["GET"])
+@login_required
+def profile():
+    user_id = session["user_id"]
+    user = db.session.get(User, user_id)
+    total_views = db.session.query(func.sum(Posts.views_count)).filter(Posts.user_id == user_id).scalar()
+    return render_template("/user/profile.html", user=user, total_views=total_views)
+
+
+@user_bp.route('/list', methods=["GET"])
+@login_required
+def user_list():
+    q = request.args.get('q', None)
+    if not q:
+        users = db.session.execute(db.select(User).limit(10)).scalars()
+    else:
+        users = db.session.execute(
+            db.select(User).where(
+                or_(
+                    User.first_name.ilike(f"%{q}%"),
+                    User.last_name.ilike(f"%{q}%")
+                )
+            )
+        ).scalars().all()
+    return render_template("/user/users.html", users=users)
+
 
 
 @user_bp.route("/logout", methods=["POST"])

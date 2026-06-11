@@ -80,6 +80,14 @@ def post_detail_page(post_id: int):
     post = db.session.get(Posts, post_id)
     if not post:
         return redirect(url_for("posts.my_posts"))
+
+    user_id = session["user_id"]  # logged user
+
+    if post.status == "draft":
+        if user_id != post.user_id:
+            # user not allowed
+            return redirect(url_for("home.home"))
+
     post.views_count += 1
     db.session.commit()
     return render_template("posts/post_detail.html", post=post)
