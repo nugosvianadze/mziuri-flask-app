@@ -4,7 +4,7 @@ from flask import Flask
 from flask_cors import CORS
 
 from registers.error_handlers import register_error_handlers
-from extensions import db, migrate
+from extensions import db, migrate, login_manager
 
 from main.routes import *
 from main.routes.posts.template_views import *
@@ -12,6 +12,7 @@ from main.routes.posts.api import *
 
 from main.routes.users.api import *
 from main.routes.users.template_views import *
+from registers.security import register_sec
 
 
 # Static template routes (commented out for now)
@@ -64,9 +65,9 @@ def create_app() -> Flask:
     )
     os.makedirs(app.instance_path, exist_ok=True)
     app.config.from_object('config.Config')
-
     db.init_app(app)
     migrate.init_app(app, db)
+    login_manager.init_app(app)
 
     CORS(app, resources={r"/api/*": {"origins": "http://localhost:63342"}})
 
@@ -74,6 +75,7 @@ def create_app() -> Flask:
     app.register_blueprint(user_bp)
     app.register_blueprint(posts_bp)
     app.register_blueprint(main_bp)
+    # sec = register_sec(db, app)
     print(app.blueprints["posts"].view_functions)
 
     register_error_handlers(app)

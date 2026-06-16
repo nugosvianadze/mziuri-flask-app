@@ -1,10 +1,11 @@
 import time
 
 from flask import render_template, redirect, url_for, request, session
+from flask_login import login_user, logout_user
 from sqlalchemy import func, or_
 from werkzeug.security import check_password_hash
 
-from extensions import db
+from extensions import db, login_manager
 from main import user_bp, login_required, get_user, Posts
 from main.models.user import User
 
@@ -14,6 +15,12 @@ from utils.validators import validate_email
 
 user_service = UserService()
 auth_service = AuthService()
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    # Returns the User object or None if it doesn't exist
+    return User.query.get(int(user_id))
 
 
 @user_bp.route("/login", methods=["GET", "POST"])
@@ -48,9 +55,10 @@ def login():
         return render_template("user/login.html",
                                error="Incorrect Credentials, Try again!")
 
-    session["user_id"] = user.id
-    session["first_name"] = user.first_name
-    session["last_name"] = user.last_name
+    # session["user_id"] = user.id
+    # session["first_name"] = user.first_name
+    # session["last_name"] = user.last_name
+    login_user(user)
     return redirect(url_for("home.home"))
 
 
@@ -75,17 +83,14 @@ def signup():
     if not data.get("success"):
         return render_template("user/register.html", errors=[data.get('message')])
 
-    session["user_id"] = data["data"]["id"]
-    session["email"] = data["data"]["email"]
+    login_user(data["user"])
     return redirect(url_for("home.home"))
 
 @user_bp.route("/profile", methods=["GET"])
 @login_required
 def profile():
-    user_id = session["user_id"]
-    user = db.session.get(User, user_id)
-    total_views = db.session.query(func.sum(Posts.views_count)).filter(Posts.user_id == user_id).scalar()
-    return render_template("/user/profile.html", user=user, total_views=total_views)
+    total_views = db.session.query(func.sum(Posts.views_count)).filter(Posts.user_id == session["_user_id"]).scalar()
+    return render_template("/user/profile.html", total_views=total_views)
 
 
 @user_bp.route('/list', methods=["GET"])
@@ -109,6 +114,5 @@ def user_list():
 
 @user_bp.route("/logout", methods=["POST"])
 def logout():
-    session.pop("user_id", None)
-    session.pop("email", None)
+    logout_user()
     return redirect(url_for("users.login"))

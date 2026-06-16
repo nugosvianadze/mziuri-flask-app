@@ -139,7 +139,8 @@ class UserService:
             return {
                 "success": True,
                 "message": "User Successfully Created!",
-                "data": user.to_dict()
+                "data": user.to_dict(),
+                "user": user
             }, 200
         except Exception as e:
             db.session.rollback()

@@ -7,8 +7,7 @@ from werkzeug.exceptions import NotFound
 from extensions import db
 from main import posts_bp
 from main.models import User, Posts
-from main.utils.decorators import login_required
-
+from flask_login import login_required, current_user
 
 CATEGORY_OPTIONS = ["Daily notes", "Process log", "Studio update", "Field journal"]
 
@@ -16,7 +15,6 @@ CATEGORY_OPTIONS = ["Daily notes", "Process log", "Studio update", "Field journa
 @posts_bp.route("/template", methods=["POST", "GET"])
 @login_required
 def create_template_post():
-    user_id = session["user_id"]
 
     if request.method == "GET":
         return render_template("posts/create_post.html")
@@ -30,20 +28,12 @@ def create_template_post():
         }, 404
 
     try:
-        user = db.get_or_404(User, user_id)
-    except NotFound as e:
-        return {
-            "success": False,
-            "message": f"User with id={user_id}, not found!"
-        }, 404
-
-    try:
         # version 2
         post = (
             Posts(
                 title=title,
             ))
-        user.posts.append(post)
+        current_user.posts.append(post)
         db.session.commit()
         return redirect(url_for("posts.my_posts"))
     except Exception as e:
@@ -57,11 +47,10 @@ def create_template_post():
 @posts_bp.route("/my-posts")
 @login_required
 def my_posts():
-    user_id = session["user_id"]
     # 1. Get the quick status summary counts (Returns 2 rows max)
     counts_data = db.session.execute(
         db.select(Posts.status, func.count(Posts.id))
-        .where(Posts.user_id == user_id)
+        .where(Posts.user_id == session["_user_id"])
         .group_by(Posts.status)
     ).all()
     counts_data = {status: count for status, count in counts_data}
@@ -69,7 +58,7 @@ def my_posts():
     # 2. Get the actual list of posts (Returns all rows)
     posts_list = db.session.scalars(
         db.select(Posts)
-        .where(Posts.user_id == user_id)
+        .where(Posts.user_id == session["_user_id"])
     ).all()
     return render_template("/user/my_posts.html", my_posts=posts_list, status_counts=counts_data)
 
@@ -81,10 +70,9 @@ def post_detail_page(post_id: int):
     if not post:
         return redirect(url_for("posts.my_posts"))
 
-    user_id = session["user_id"]  # logged user
 
     if post.status == "draft":
-        if user_id != post.user_id:
+        if session["_user_id"] != post.user_id:
             # user not allowed
             return redirect(url_for("home.home"))
 
